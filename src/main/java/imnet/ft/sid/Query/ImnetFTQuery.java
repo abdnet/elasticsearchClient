@@ -14,9 +14,7 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.json.simple.JSONObject;
 
 import imnet.ft.sid.entities.ResultatFT;
-import oracle.sid.persist.dao.DAO;
-import oracle.sid.persist.dao.DocumentDao;
-import oracle.sid.persist.entities.Documents;
+
 
 
 public class ImnetFTQuery {
@@ -30,7 +28,7 @@ public class ImnetFTQuery {
 
 	private String sort;
 	private String aggs;
-	private DAO dao=new DocumentDao();
+//private DAO dao=new DocumentDao();
 	private ResultatFT resultats_fulltext;
 	public ImnetFTQuery(Client client) {
 		this.client = client;
@@ -125,19 +123,19 @@ public class ImnetFTQuery {
 			hit_field = new HashMap<String,Object>();
 			
 			int id=(int)Double.parseDouble(hit.getSourceAsMap().get("ID_DOCUMENT").toString());
-			Documents doc =  (Documents) dao.read(id);
+			//Documents doc =  (Documents) dao.read(id);
 			hit_field.put("SCORE", hit.getScore());
-			hit_field.put("TITRE", doc.getDocuement_title());
-			hit_field.put("AUTEUR", doc.getDocuement_author());
-			hit_field.put("ID_BD", doc.getDocument_id());
+			//hit_field.put("TITRE", doc.getDocuement_title());
+			//hit_field.put("AUTEUR", doc.getDocuement_author());
+			//hit_field.put("ID_BD", doc.getDocument_id());
 			hit_field.put("ID_FT", hit.getId());
 			hit_field.put("DATE_ARCH", hit.getSourceAsMap().get("DATE_UPLOAD_DOCUMENT"));
 			String hight_str="";
 			for(Text hight:hit.getHighlightFields().get("CONTENT_DOCUMENT").getFragments()) {
-				hight_str+=hight.string()+"\n";
+				hight_str+="..."+hight.string()+"....\n";
 			}
 			hit_field.put("HIGHLIGHTER", hight_str);
-			hits.put(hit.getId()+"#"+hit.getScore(), hit_field);
+			hits.put(hit.getSourceAsMap().get("ID_DOCUMENT").toString(), hit_field);
 		}
 		hits_with_score.put("HITS", hits);
 		hits_with_score.put("INFO", extraDataResponse);

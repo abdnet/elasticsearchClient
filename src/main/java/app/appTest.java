@@ -35,7 +35,7 @@ public class appTest {
 		System.out.println(query.searchDocument("idouhammou"));
 		
 		trasport.getInstant().close();
-	}
+	}	
 	
 
 
