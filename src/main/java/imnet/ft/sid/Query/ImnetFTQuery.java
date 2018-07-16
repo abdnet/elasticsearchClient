@@ -1,5 +1,6 @@
 package imnet.ft.sid.Query;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,28 +86,53 @@ public class ImnetFTQuery {
 	}
 
 	public String searchDocument(String str) {
-			
-
-		HighlightBuilder highlightBuilder = new HighlightBuilder()
-		        .preTags("<span id=\"highlight\">")
-		        .postTags("</span>")
-		        .fragmentSize(100)
-		        .field("CONTENT_DOCUMENT");
 		
 		
 		SearchResponse response = this.client.prepareSearch("idouhammou").setTypes("type")
-				//.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 				.setQuery(QueryBuilders.termQuery("CONTENT_DOCUMENT", str)) // Query
-				//.setPostFilter(QueryBuilders.rangeQuery("ID_DOCUMENT").from(from).to(to)) // Filter
-				.setFrom(0).setSize(60).setExplain(false)
-				.highlighter(highlightBuilder)
-				//.setTerminateAfter(10)
+				.setFrom(0).setSize(50).setExplain(false)
+				.highlighter(this.getHitlight("CONTENT_DOCUMENT"))
+				.setTrackScores(true)
 				.get();
 		return this.responseToJsonObject(response);
 	}
 		
 	
+	public String searchTerms(ArrayList<String> strs) {
+		
+		SearchResponse response = this.client.prepareSearch("idouhammou").setTypes("type")
+								.setQuery(QueryBuilders.termsQuery("CONTENT_DOCUMENT", strs))
+								.setFrom(0)
+								.setSize(50)
+								
+								.highlighter(this.getHitlight("CONTENT_DOCUMENT"))
+								.setTrackScores(true)
+								.get();
+		
+		
+		return this.responseToJsonObject(response);
+	}
 	
+	
+	public String searchFuzzy(String str) {
+		SearchResponse response = this.client.prepareSearch("idouhammou").setTypes("type")
+				.setQuery(QueryBuilders.fuzzyQuery("CONTENT_DOCUMENT", str)
+						.maxExpansions(100).fuzziness(Fuzziness.AUTO))
+				.setFrom(0)
+				.setSize(5)
+				.highlighter(this.getHitlight("CONTENT_DOCUMENT"))
+				.get();
+		return this.responseToJsonObject(response);
+	}
+	
+	public HighlightBuilder getHitlight(String field) {
+		HighlightBuilder highlightBuilder = new HighlightBuilder()
+		        .preTags("<span id=\"highlight\">")
+		        .postTags("</span>")
+		        .fragmentSize(100)
+		        .field(field);
+		return highlightBuilder;
+	}
 	public String responseToJsonObject(SearchResponse response) {
 		Map<Object,Object> hits_with_score = new HashMap<Object,Object>();
 		Map<String,Object> hit_field ;
@@ -117,14 +143,14 @@ public class ImnetFTQuery {
 		SearchHit[] results = response.getHits().getHits();
 		extraDataResponse.put("SCORE_MAX", response.getHits().getMaxScore());
 		extraDataResponse.put("NOMBRE_HITS", response.getHits().getTotalHits());
-		extraDataResponse.put("DUREE_TOOK", response.getTook().getMinutes());
+		extraDataResponse.put("DUREE_TOOK", response.getTook().millis());
 		
 		for(SearchHit hit:results) {
 			hit_field = new HashMap<String,Object>();
 			
 			int id=(int)Double.parseDouble(hit.getSourceAsMap().get("ID_DOCUMENT").toString());
 			//Documents doc =  (Documents) dao.read(id);
-			hit_field.put("SCORE", hit.getScore());
+			hit_field.put("SCORE", ((hit.getScore()/response.getHits().getMaxScore())*100));
 			//hit_field.put("TITRE", doc.getDocuement_title());
 			//hit_field.put("AUTEUR", doc.getDocuement_author());
 			//hit_field.put("ID_BD", doc.getDocument_id());
@@ -150,7 +176,7 @@ public class ImnetFTQuery {
 				.field("CONTENT_DOCUMENT",3.2f)	
 				//.field("ID_DOCUMENT",1.2f)	
 				.analyzer("standard")
-					//.matchQuery()
+				//.matchQuery()
 				//.slop(10)
                 .fuzziness(Fuzziness.AUTO);
                 //.prefixLength(3);
@@ -161,7 +187,6 @@ public class ImnetFTQuery {
 
 		public String getBoolQuery(String str) {
 			QueryBuilder qb = QueryBuilders
-					
 					.boolQuery()
 	                .must(QueryBuilders.termsQuery("CONTENT_DOCUMENT",str));
 			String out=client.prepareSearch().setQuery(qb).execute().actionGet().getHits().toString();

@@ -32,7 +32,7 @@ public class appTest {
 		System.out.println("************************** Recherche ********************");
 		ImnetFTQuery query = new ImnetFTQuery(trasport.getInstant());
 		//query.querybuilderrr();
-		System.out.println(query.searchDocument("idouhammou"));
+		System.out.println(query.searchDocument("lucene"));
 		
 		trasport.getInstant().close();
 	}	

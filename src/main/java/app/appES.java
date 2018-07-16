@@ -259,10 +259,7 @@ public class appES {
 
 		crud.getFieldMap();
 		
-		System.out.println("************************** Recherche ********************");
-		ImnetFTQuery query = new ImnetFTQuery(trasport.getInstant());
-		query.searchDocument("idouhammou");
-		
+	
 		
 		
 	}

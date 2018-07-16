@@ -1,6 +1,8 @@
 package imnet.ft.sid.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.websocket.server.PathParam;
 import javax.ws.rs.Consumes;
@@ -15,6 +17,7 @@ import javax.ws.rs.core.Response;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 import imnet.ft.sid.Query.ImnetFTQuery;
 import imnet.ft.sid.entities.ESConfiguration;
@@ -50,7 +53,7 @@ public class SearchService {
 	@Path("/search")
 	@Produces(MediaType.APPLICATION_JSON)  
 	public String  search_str(@QueryParam(value="str") String str) throws JsonGenerationException, JsonMappingException, IOException {
-		System.out.println(str);
+		ArrayList<String> strs = new ArrayList<String>();
 		ESConfiguration config= new ESConfiguration();
 		config.setCluster("elasticsearch")
 			   .setHostIP("127.0.0.1")
@@ -59,10 +62,16 @@ public class SearchService {
 			   .setReplicas(1)
 			   .setTransportSniff("true");
 		
-		ObjectMapper mapper = new ObjectMapper();
+	ObjectMapper mapper = new ObjectMapper();
+	strs =mapper.readValue(str, new TypeReference<List<String>>(){});
+	
 	ClientTransptES trasport=new ClientTransptES(config);
 	ImnetFTQuery query = new ImnetFTQuery(trasport.getInstant());
-	return (query.searchDocument(str));
+	if(strs.size() == 1) {
+		return (query.searchDocument(strs.get(0)));
+		//return query.searchFuzzy(str);
+	}
+	else{return query.searchTerms(strs);}
 				
 	}
 
