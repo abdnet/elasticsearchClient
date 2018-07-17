@@ -8,12 +8,12 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
 
-import imnet.ft.sid.Index.ImnetMapping;
-import imnet.ft.sid.IndexBuilder.MappingBuilder;
-import imnet.ft.sid.Query.ImnetFTQuery;
+import imnet.ft.commun.configuration.ClientTransptES;
+import imnet.ft.indexing.Index.ImnetMapping;
+import imnet.ft.indexing.IndexBuilder.MappingBuilder;
+import imnet.ft.searching.Query.ImnetFTQuery;
 import imnet.ft.sid.entities.ESConfiguration;
 import imnet.ft.sid.entities.MyFields;
-import imnet.ft.sid.indexing.ClientTransptES;
 
 public class appTest {
 	
@@ -30,11 +30,12 @@ public class appTest {
 	
 	ClientTransptES trasport=new ClientTransptES(config);
 		System.out.println("************************** Recherche ********************");
-		ImnetFTQuery query = new ImnetFTQuery(trasport.getInstant());
-		//query.querybuilderrr();
-		System.out.println(query.searchDocument("lucene"));
+//		ImnetFTQuery query = new ImnetFTQuery(trasport.getInstant());
+//		//query.querybuilderrr();
+//		query.multisearch();
+//		
+//		trasport.getInstant().close();
 		
-		trasport.getInstant().close();
 	}	
 	
 

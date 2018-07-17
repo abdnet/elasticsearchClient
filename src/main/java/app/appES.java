@@ -8,26 +8,25 @@ import java.util.Map.Entry;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
+import imnet.ft.commun.configuration.ClientTransptES;
 import imnet.ft.commun.util.ElasticSearchReservedWords;
-import imnet.ft.sid.Index.ImnetAnalysis;
-import imnet.ft.sid.Index.ImnetAnalyzer;
-import imnet.ft.sid.Index.ImnetFilter;
-import imnet.ft.sid.Index.ImnetMapping;
-import imnet.ft.sid.Index.ImnetSettings;
-import imnet.ft.sid.IndexBuilder.AnalysisBuilder;
-import imnet.ft.sid.IndexBuilder.AnalyzerBuilder;
-import imnet.ft.sid.IndexBuilder.FilterBuilder;
-import imnet.ft.sid.IndexBuilder.IndexSchema;
-import imnet.ft.sid.IndexBuilder.MappingBuilder;
-import imnet.ft.sid.IndexBuilder.SettingsBuilder;
-import imnet.ft.sid.Query.ImnetFTQuery;
-import imnet.ft.sid.Schema.UpdateSchema;
+import imnet.ft.indexing.Index.ImnetAnalysis;
+import imnet.ft.indexing.Index.ImnetAnalyzer;
+import imnet.ft.indexing.Index.ImnetFilter;
+import imnet.ft.indexing.Index.ImnetMapping;
+import imnet.ft.indexing.Index.ImnetSettings;
+import imnet.ft.indexing.IndexBuilder.AnalysisBuilder;
+import imnet.ft.indexing.IndexBuilder.AnalyzerBuilder;
+import imnet.ft.indexing.IndexBuilder.FilterBuilder;
+import imnet.ft.indexing.IndexBuilder.IndexSchema;
+import imnet.ft.indexing.IndexBuilder.MappingBuilder;
+import imnet.ft.indexing.IndexBuilder.SettingsBuilder;
+import imnet.ft.searching.Query.ImnetFTQuery;
 import imnet.ft.sid.crud.ClusterCrud;
 import imnet.ft.sid.crud.DocumentCRUD;
 import imnet.ft.sid.entities.Document;
 import imnet.ft.sid.entities.ESConfiguration;
 import imnet.ft.sid.entities.MyFields;
-import imnet.ft.sid.indexing.ClientTransptES;
 import oracle.sid.persist.dao.DAO;
 import oracle.sid.persist.dao.DocumentDao;
 import tikka.sid.commun.tika.ExtractMetaData;
@@ -211,7 +210,6 @@ public class appES {
 		
 		ClientTransptES trasport=new ClientTransptES(config);
 		ClusterCrud client =new ClusterCrud(trasport.getInstant());	
-		UpdateSchema update=new UpdateSchema(trasport.getInstant());
 
 		client.deleteIndex("idouhammou");
 		client.createNewIndex("idouhammou", schema.indexDefaultInit());

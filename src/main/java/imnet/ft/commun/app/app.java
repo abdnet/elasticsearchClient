@@ -2,8 +2,8 @@ package imnet.ft.commun.app;
 
 import java.io.IOException;
 
+import imnet.ft.commun.configuration.ClientTransptES;
 import imnet.ft.sid.crud.ClusterCrud;
-import imnet.ft.sid.indexing.ClientTransptES;
 
 public class app {
 

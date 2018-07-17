@@ -60,9 +60,34 @@ public interface ElasticSearchReserved {
 			  "char_filter"
 			  );
 	  
-	  static final List<String> query_type=Arrays.asList(
-			  "must",
-			  "must_not",
-			  "should"			  
+	  static final List<String> query_term_level_type=Arrays.asList(
+			  "term",
+			  "wildcard",
+			  "prefix",
+			  "fuzzy",
+			  "rang",
+			  "query_string",
+			  "text",
+			  "missing"
 			  );
+	  
+	  
+	  static final List<String> query_full_text_type=Arrays.asList(
+			  "match",
+			  "match_phrase",
+			  "match_phrase_prefix",
+			  "multi_match",
+			  "common",
+			  "query_string",
+			  "simple_query_string"
+			  );
+	  
+	  static final List<String> query_compound_type=Arrays.asList(
+			  "constant_score",
+			  "bool",
+			  "dis_max",
+			  "function_score",
+			  "boosting"
+			  );
+
 }
