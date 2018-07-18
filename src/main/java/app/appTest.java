@@ -12,6 +12,7 @@ import imnet.ft.commun.configuration.ClientTransptES;
 import imnet.ft.indexing.Index.ImnetMapping;
 import imnet.ft.indexing.IndexBuilder.MappingBuilder;
 import imnet.ft.searching.Query.ImnetFTQuery;
+import imnet.ft.searching.Templates.SearchTemplate;
 import imnet.ft.sid.entities.ESConfiguration;
 import imnet.ft.sid.entities.MyFields;
 
@@ -35,7 +36,7 @@ public class appTest {
 //		query.multisearch();
 //		
 //		trasport.getInstant().close();
-		
+		SearchTemplate template = new SearchTemplate(trasport.getInstant());
 	}	
 	
 

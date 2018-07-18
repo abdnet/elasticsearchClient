@@ -91,10 +91,7 @@ public class appES {
 				.isDefault()
 				.setFilter_object(filters_lot_2)
 				.build();
-		final ImnetFilter f3 = new  FilterBuilder()
-				.isDefault()
-				.setFilter_object(filters_lot_2)
-				.build();
+		
 		System.out.println("************** Analyzer ********************\n\n");
 		final HashMap<String, Object> analyze_1_proprety = new HashMap<String, Object>() {{
 		    put("type","custom");
@@ -107,16 +104,10 @@ public class appES {
 		    put("tokenizer","standard");
 		    put("filter",f1);
 		}};
-		final HashMap<String, Object> analyze_3_proprety = new HashMap<String, Object>() {{
-		    put("type","custom");
-		    put("tokenizer","standard");
-		    put("filter",f3);
-		}};
-		
+	
 		 HashMap<String, Map<String,Object>> analyzer_lot = new HashMap<String,  Map<String,Object>>() {{
 			    put("nGram_analyzer",analyze_1_proprety);
 			    put("body_analyzer",analyze_2_proprety);
-			    put("tehst",analyze_3_proprety);
 			}};
 			
 		ImnetAnalyzer a1 = new AnalyzerBuilder()
@@ -138,7 +129,6 @@ public class appES {
 		ImnetAnalysis analysis = new AnalysisBuilder()
 				.setImnetFilter(f2)
 				.setImnetFilter(f1)
-				.setImnetFilter(f3)
 				//.setImnetTokenizer(t1)
 				.setImnetAnalyzer(a1)
 				.build();
@@ -153,7 +143,10 @@ public class appES {
 				.build();
 		System.out.println("********************* Mappings index ****************");
 		
-		
+		HashMap<String, Object> fields_options = new HashMap<String,Object>() {{
+		   put("term_vector","with_positions_offsets_payloads");
+		  
+					}};
 		MyFields field1 = new MyFields()
 				.setFiled_name("ID_DOCUMENT")
 				.setField_type(ElasticSearchReservedWords.KEYWORD.getText())
@@ -171,6 +164,7 @@ public class appES {
 				.setField_type("text")
 				.setField_stored(true);
 		
+		
 		MyFields field4 = new MyFields()
 				.setFiled_name("CONTENT_DOCUMENT")
 				.setField_type("text")
@@ -178,7 +172,8 @@ public class appES {
 				.setField_search_analyzer("body_analyzer")
 				.setField_copyTO("FULL_TEXT")
 				.setField_stored(false)
-				.setField_indexed(true);
+				.setField_indexed(true)
+				.setAutre_options(fields_options);
 		
 		
 		MyFields field5 = new MyFields()

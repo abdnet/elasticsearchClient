@@ -73,13 +73,17 @@ public class ImnetMapping {
 						if(!this.fields.isEmpty()) {
 							for(MyFields field:this.fields) {
 								schemaIndex.startObject(field.getFiled_name());
-								
 								schemaIndex.field(ElasticSearchReservedWords.TYPE.getText(),field.getField_type());
 								schemaIndex.field(ElasticSearchReservedWords.INDEX.getText(), field.isField_indexed());
 								schemaIndex.field(ElasticSearchReservedWords.STORE.getText(),field.isField_stored());
 								if(field.getField_analyzer()!=null) schemaIndex.field(ElasticSearchReservedWords.ANALYZER.getText(),field.getField_analyzer());
 								if(field.getField_search_analyzer()!=null)schemaIndex.field(ElasticSearchReservedWords.SEARCH_ANALYZER.getText(),field.getField_search_analyzer());
 								if(!field.getField_copyTO().equals("")&&this.isExistField(field.getField_copyTO())) schemaIndex.field(ElasticSearchReservedWords.COPY_TO.getText(),field.getField_copyTO());
+								if(field.getAutre_options()!=null) {
+									for(Entry<String,Object> entry:field.getAutre_options().entrySet()) {
+										schemaIndex.field(entry.getKey(),entry.getValue());
+									}
+								}
 								schemaIndex.endObject();
 							}
 							

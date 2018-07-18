@@ -1,5 +1,6 @@
 package imnet.ft.sid.entities;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class MyFields {
@@ -13,6 +14,7 @@ public class MyFields {
 	private boolean field_indexed=false;
 	private boolean field_stored=true;
 	private String field_copyTO="";
+	private Map<String,Object> autre_options = null;
 	
 	public MyFields() {
 		super();
@@ -20,7 +22,7 @@ public class MyFields {
 	
 	
 	public MyFields(String filed_name, String field_type, String field_analyzer, String field_search_analyzer,
-			boolean field_indexed, boolean field_stored) {
+			boolean field_indexed, boolean field_stored,Map<String,Object> autre_options) {
 		super();
 		this.filed_name = filed_name;
 		this.field_type = field_type;
@@ -28,6 +30,7 @@ public class MyFields {
 		this.field_search_analyzer = field_search_analyzer;
 		this.field_indexed = field_indexed;
 		this.field_stored = field_stored;
+		this.autre_options=autre_options;
 	}
 
 
@@ -103,6 +106,18 @@ public class MyFields {
 
 	public MyFields setField_stored(boolean field_stored) {
 		this.field_stored = field_stored;
+		return this;
+	}
+
+	
+
+	public Map<String, Object> getAutre_options() {
+		return autre_options;
+	}
+
+
+	public MyFields setAutre_options(Map<String, Object> autre_options) {
+		this.autre_options = autre_options;
 		return this;
 	}
 
