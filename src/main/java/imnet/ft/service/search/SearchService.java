@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.websocket.server.PathParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -20,6 +19,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import imnet.ft.commun.configuration.ClientTransptES;
+import imnet.ft.commun.util.ElasticSearchReservedWords;
 import imnet.ft.searching.Query.ImnetFTQuery;
 import imnet.ft.sid.entities.ESConfiguration;
 
@@ -67,12 +67,7 @@ public class SearchService {
 	
 	ClientTransptES trasport=new ClientTransptES(config);
 	ImnetFTQuery query = new ImnetFTQuery(trasport.getInstant());
-	if(strs.size() == 1) {
-		return (query.searchDocument(strs.get(0)));
-		//return query.searchFuzzy(str);
-	}
-	else{return query.searchTerms(strs);}
-				
+	return query.sendResponseQuery(ElasticSearchReservedWords.QUERY_MATCH.getText(),str,0);
 	}
 
 }

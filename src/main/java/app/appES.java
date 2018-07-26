@@ -206,8 +206,8 @@ public class appES {
 		ClientTransptES trasport=new ClientTransptES(config);
 		ClusterCrud client =new ClusterCrud(trasport.getInstant());	
 
-		client.deleteIndex("idouhammou");
-		client.createNewIndex("idouhammou", schema.indexDefaultInit());
+		//client.deleteIndex("idouhammou");
+		//client.createNewIndex("idouhammou", schema.indexDefaultInit());
 		System.out.println("******************* SCHEMA **************************");
 		System.out.println(schema.indexDefaultInit().bytes().utf8ToString());
 		client.getIndexInfo("idouhammou", "");

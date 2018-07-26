@@ -5,17 +5,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.Fuzziness;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.json.simple.JSONObject;
 
+import imnet.ft.commun.configuration.ElasticSearchDefaultConfiguration;
+import imnet.ft.commun.util.ElasticSearchReservedWords;
+import imnet.ft.searching.Templates.SearchTemplate;
 import imnet.ft.sid.entities.ResultatFT;
 
 
@@ -27,69 +32,39 @@ public class ImnetFTQuery {
 	private String query_Type;
 	private Map<String, String> fields_Data;
 	private Map<String, Map<String, String>> type_WITH_fields;
-	private int size = 5, from = 0;
-
+	private int max_response = 5;
+	private SearchTemplate template;
 	private String sort;
 	private String aggs;
-//private DAO dao=new DocumentDao();
 	private ResultatFT resultats_fulltext;
-	public ImnetFTQuery(Client client) {
-		this.client = client;
-	}
-
+	private TimeValue scrollTime_scroll;
+	private SearchResponse searchresponse=null;
+	public ImnetFTQuery(Client client) {this.client = client;}
 	public ImnetFTQuery(Client client, String query_Type, Map<String, String> fields_Data,
-			Map<String, Map<String, String>> type_WITH_fields, int size, int from, String sort, String aggs) {
+			Map<String, Map<String, String>> type_WITH_fields, int size,String sort, String aggs) {
 		super();
 		this.client = client;
 		this.query_Type = query_Type;
 		this.fields_Data = fields_Data;
 		this.type_WITH_fields = type_WITH_fields;
-		this.size = size;
-		this.from = from;
+		this.max_response = size;
 		this.sort = sort;
 		this.aggs = aggs;
 	}
 
 	// POJO
-	public Client getClient() {
-		return client;
-	}
-
-	public void setClient(Client client) {
-		this.client = client;
-	}
-
-	public String getQuery_Type() {
-		return query_Type;
-	}
-
-	public Map<String, String> getFields_Data() {
-		return fields_Data;
-	}
-
-	public Map<String, Map<String, String>> getType_WITH_fields() {
-		return type_WITH_fields;
-	}
-
-	public int getSize() {
-		return size;
-	}
-
-	public int getFrom() {
-		return from;
-	}
-
-	public String getSort() {
-		return sort;
-	}
-
-	public String getAggs() {
-		return aggs;
-	}
-
+	public Client getClient() {return client;}
+	public void setClient(Client client) {this.client = client;}
+	public String getQuery_Type() {return query_Type;}
+	public Map<String, String> getFields_Data() {return fields_Data;}
+	public Map<String, Map<String, String>> getType_WITH_fields() {return type_WITH_fields;}
+	public int getMax_response() {return this.max_response;}	
+	public String getSort() {return sort;}
+	public String getAggs() {return aggs;}
+	
+	public SearchResponse getSearchresponse() {return searchresponse;}
+	public ImnetFTQuery setSearchresponse(SearchResponse searchresponse) {this.searchresponse = searchresponse;return this;}
 	public String searchDocument(String str) {
-		
-		
 		SearchResponse response = this.client.prepareSearch("idouhammou").setTypes("type")
 				.setQuery(QueryBuilders.termQuery("CONTENT_DOCUMENT", str)) // Query
 				.setFrom(0).setSize(50).setExplain(false)
@@ -98,24 +73,17 @@ public class ImnetFTQuery {
 				.get();
 		return this.responseToJsonObject(response);
 	}
-		
-	
 	public String searchTerms(ArrayList<String> strs) {
 		
 		SearchResponse response = this.client.prepareSearch("idouhammou").setTypes("type")
 								.setQuery(QueryBuilders.termsQuery("CONTENT_DOCUMENT", strs))
 								.setFrom(0)
 								.setSize(50)
-								
 								.highlighter(this.getHitlight("CONTENT_DOCUMENT"))
 								.setTrackScores(true)
 								.get();
-		
-		
 		return this.responseToJsonObject(response);
 	}
-	
-	
 	public String searchFuzzy(String str) {
 		SearchResponse response = this.client.prepareSearch("idouhammou").setTypes("type")
 				.setQuery(QueryBuilders.fuzzyQuery("CONTENT_DOCUMENT", str)
@@ -126,7 +94,6 @@ public class ImnetFTQuery {
 				.get();
 		return this.responseToJsonObject(response);
 	}
-	
 	public HighlightBuilder getHitlight(String field) {
 		HighlightBuilder highlightBuilder = new HighlightBuilder()
 		        .preTags("<span id=\"highlight\">")
@@ -146,16 +113,12 @@ public class ImnetFTQuery {
 		extraDataResponse.put("SCORE_MAX", response.getHits().getMaxScore());
 		extraDataResponse.put("NOMBRE_HITS", response.getHits().getTotalHits());
 		extraDataResponse.put("DUREE_TOOK", response.getTook().millis());
+		extraDataResponse.put("curseur_id".toUpperCase(), response.getScrollId());
 		
 		for(SearchHit hit:results) {
 			hit_field = new HashMap<String,Object>();
-			
 			int id=(int)Double.parseDouble(hit.getSourceAsMap().get("ID_DOCUMENT").toString());
-			//Documents doc =  (Documents) dao.read(id);
-			hit_field.put("SCORE", ((hit.getScore()/response.getHits().getMaxScore())*100));
-			//hit_field.put("TITRE", doc.getDocuement_title());
-			//hit_field.put("AUTEUR", doc.getDocuement_author());
-			//hit_field.put("ID_BD", doc.getDocument_id());
+			hit_field.put("SCORE", this.scoreCategory(hit.getScore(), response.getHits().getMaxScore()));
 			hit_field.put("ID_FT", hit.getId());
 			hit_field.put("DATE_ARCH", hit.getSourceAsMap().get("DATE_UPLOAD_DOCUMENT"));
 			String hight_str="";
@@ -171,23 +134,7 @@ public class ImnetFTQuery {
 		System.out.println(results_es);
 		return results_es.toJSONString();
 	}
-	
-	public String querybuilderrr(String str) {
-		QueryBuilder matchQueryBuilder = QueryBuilders
-				.multiMatchQuery(str)
-				.field("CONTENT_DOCUMENT",3.2f)	
-				//.field("ID_DOCUMENT",1.2f)	
-				.analyzer("standard")
-				//.matchQuery()
-				//.slop(10)
-                .fuzziness(Fuzziness.AUTO);
-                //.prefixLength(3);
-		return (matchQueryBuilder.toString());
-	}
-	
-
-
-		public String getBoolQuery(String str) {
+	public String getBoolQuery(String str) {
 			QueryBuilder qb = QueryBuilders
 					.boolQuery()
 	                .must(QueryBuilders.termsQuery("CONTENT_DOCUMENT",str));
@@ -196,11 +143,7 @@ public class ImnetFTQuery {
 				System.out.println(qb.toString());
 			return out; 
 		}
-		
-		
-		
-		
-		public void multisearch() {
+	public void multisearch() {
 			SearchRequestBuilder srb1 =client
 				    .prepareSearch().setQuery(QueryBuilders.queryStringQuery("java")).setSize(1);
 				SearchRequestBuilder srb2 = client
@@ -220,7 +163,41 @@ public class ImnetFTQuery {
 				    
 				}
 		}
+	public String sendResponseQuery(String queryType,String queryStr,int fetchpage) {
+			template = new SearchTemplate(this.getClient());
+			this.searchresponse= this.client.prepareSearch("idouhammou").setTypes("type")
+					.setQuery(template.switcherSearchByType(
+							ElasticSearchReservedWords.QUERY_MATCH.getText(),
+							queryStr,ElasticSearchReservedWords.OPERATOR_OR.getText())
+						).setSize(Integer.parseInt(ElasticSearchDefaultConfiguration.DEFAULTSIZEPAGE.getText()))
+						 .highlighter(this.getHitlight(ElasticSearchDefaultConfiguration.DEFAULTFIELDSEARCH.getText()))
+						 .setScroll(new TimeValue(6000))
+						 .get();
+			return this.responseToJsonObject(this.searchresponse);
+			
+		}
+	public int scoreCategory(float docScore,float Scoremax) {
+			
+			float scorepourcentage = docScore*100/Scoremax;
+			
+			if(scorepourcentage<=20) {return 1;}
+			if(scorepourcentage>20&&scorepourcentage<=40) {return 2;}
+			if(scorepourcentage>40&&scorepourcentage<=60) {return 3;}
+			if(scorepourcentage>61&&scorepourcentage<=80) {return 4;}
+			if(scorepourcentage>80) {return 5;}
+			return 0;
+				
+		}
+	public String sendNextPageLastQueryByScrollId() {
+		int i=0;
+		while(this.searchresponse.getHits().getHits().length>0)
+		{			 
+			 this.responseToJsonObject(this.getSearchresponse());
+			 this.searchresponse = client.prepareSearchScroll(this.getSearchresponse().getScrollId()).setScroll(new TimeValue(Long.parseLong(ElasticSearchDefaultConfiguration.DEFAULTTIMEVALUESCROLL.getText()))).execute().actionGet();
+		}
 
+		return "fdqfd";
+	}
 }
 
 

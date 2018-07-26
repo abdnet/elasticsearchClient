@@ -77,9 +77,13 @@ public enum ElasticSearchReservedWords
 	MAPPINGS("mappings"),
 	SETTINGS("settings"),
 	STOPWORDS("stopwords/"),
-	CLIENTTRANSPORTSNIFF("client.transport.sniff")
-	
-	
+	CLIENTTRANSPORTSNIFF("client.transport.sniff"),
+	OPERATOR_AND("AND"),
+	OPERATOR_OR("OR"),
+	/*
+	 * type de requete 
+	 * */
+	QUERY_MATCH("match")
 	;
     
     private String text;

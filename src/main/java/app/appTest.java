@@ -9,6 +9,7 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
 
 import imnet.ft.commun.configuration.ClientTransptES;
+import imnet.ft.commun.util.ElasticSearchReservedWords;
 import imnet.ft.indexing.Index.ImnetMapping;
 import imnet.ft.indexing.IndexBuilder.MappingBuilder;
 import imnet.ft.searching.Query.ImnetFTQuery;
@@ -31,12 +32,11 @@ public class appTest {
 	
 	ClientTransptES trasport=new ClientTransptES(config);
 		System.out.println("************************** Recherche ********************");
-//		ImnetFTQuery query = new ImnetFTQuery(trasport.getInstant());
-//		//query.querybuilderrr();
-//		query.multisearch();
-//		
-//		trasport.getInstant().close();
-		SearchTemplate template = new SearchTemplate(trasport.getInstant());
+		ImnetFTQuery query = new ImnetFTQuery(trasport.getInstant());
+		//query.querybuilderrr();
+		query.sendResponseQuery(ElasticSearchReservedWords.QUERY_MATCH.getText(),"JAVA",0);
+		System.out.println(query.sendNextPageLastQueryByScrollId());
+
 	}	
 	
 
