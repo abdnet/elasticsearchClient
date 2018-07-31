@@ -1,5 +1,6 @@
 package imnet.ft.searching.Query;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,7 @@ import imnet.ft.commun.configuration.ElasticSearchDefaultConfiguration;
 import imnet.ft.commun.util.ElasticSearchReservedWords;
 import imnet.ft.searching.Templates.SearchTemplate;
 import imnet.ft.sid.entities.ResultatFT;
+import tikka.sid.commun.tika.ExtractMetaData;
 
 
 
@@ -61,6 +63,8 @@ public class ImnetFTQuery {
 	public int getMax_response() {return this.max_response;}	
 	public String getSort() {return sort;}
 	public String getAggs() {return aggs;}
+	
+	
 	
 	public SearchResponse getSearchresponse() {return searchresponse;}
 	public ImnetFTQuery setSearchresponse(SearchResponse searchresponse) {this.searchresponse = searchresponse;return this;}
@@ -165,14 +169,14 @@ public class ImnetFTQuery {
 		}
 	public String sendResponseQuery(String queryType,String queryStr,int fetchpage) {
 			template = new SearchTemplate(this.getClient());
-			this.searchresponse= this.client.prepareSearch("idouhammou").setTypes("type")
-					.setQuery(template.switcherSearchByType(
-							ElasticSearchReservedWords.QUERY_MATCH.getText(),
-							queryStr,ElasticSearchReservedWords.OPERATOR_OR.getText())
-						).setSize(Integer.parseInt(ElasticSearchDefaultConfiguration.DEFAULTSIZEPAGE.getText()))
-						 .highlighter(this.getHitlight(ElasticSearchDefaultConfiguration.DEFAULTFIELDSEARCH.getText()))
-						 .setScroll(new TimeValue(6000))
-						 .get();
+			
+			this.searchresponse= this.client.prepareSearch(ElasticSearchDefaultConfiguration.DEFAULTINDEXNAME.getText())
+					.setTypes(ElasticSearchDefaultConfiguration.DEFAULTINDEXTYPE.getText())
+					.setQuery(template.switcherSearchByType(ElasticSearchReservedWords.QUERY_MATCH.getText(),queryStr,ElasticSearchReservedWords.OPERATOR_OR.getText()))
+					.setSize(Integer.parseInt(ElasticSearchDefaultConfiguration.DEFAULTSIZEPAGE.getText()))
+					.highlighter(this.getHitlight(ElasticSearchDefaultConfiguration.DEFAULTFIELDSEARCH.getText()))
+					.setScroll(new TimeValue(6000))
+					.get();
 			return this.responseToJsonObject(this.searchresponse);
 			
 		}
@@ -197,6 +201,18 @@ public class ImnetFTQuery {
 		}
 
 		return "fdqfd";
+	}
+	
+	public String getIndexByLanguage(String strQuery) {
+		ExtractMetaData extractMetaData = new ExtractMetaData();
+		String language="neant";
+		try {
+			 language=extractMetaData.detectFileLanguage(strQuery);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return language;
+		
 	}
 }
 

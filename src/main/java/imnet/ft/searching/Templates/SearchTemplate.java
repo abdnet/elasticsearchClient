@@ -73,6 +73,8 @@ public class SearchTemplate {
 			break;
 		case "simple_query_string":
 				break;
+		case "":
+				break;
 		default :	
 				logger.debug("le type de recherche "+search_type+" n'est pas disponible");
 				break;

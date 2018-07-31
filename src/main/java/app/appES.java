@@ -47,7 +47,6 @@ public class appES {
 			
 				}};
 				
-
 				final HashMap<String, Object> filter_elision = new HashMap<String, Object>() {{
 					   put("type","elision");
 					   put("articles", new String[]{"l", "m", "t", "qu", "n", "s", "j", "d", "c", "jusqu", "quoiqu", "lorsqu", "puisqu"});
