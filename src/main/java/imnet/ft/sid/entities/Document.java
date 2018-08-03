@@ -1,24 +1,29 @@
 package imnet.ft.sid.entities;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.*;
 import java.util.Date;
+import java.util.Locale;
 
 public class Document {
 	private String content_document ="";
-	private double id_document=0.0;
-	private String date_upload_document="";
+	private int IdFT_document=0;
+	private String  date_upload_document;
 	private long version_document=0;
-	private SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yy");
+	private SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.FRANCE);
+   
+
 	private String title_document="";
 	private String fragment_document_highlighter = "";
 	
 	
-	public Document(String content_document, double id_document, Date date_upload_document,
+	public Document(String content_document, int IdFT_document, String date_upload_document,
 			long version_document,String title) {
 		super();
 		this.content_document = content_document;
-		this.id_document = id_document;
-		this.date_upload_document = formater.format(new Date());
+		this.IdFT_document = IdFT_document;
+		this.date_upload_document = date_upload_document;
 		this.version_document = version_document;
 		this.title_document=title;
 	}
@@ -49,27 +54,26 @@ public class Document {
 	}
 
 
-	public void setId_document(double id_document) {
-		this.id_document = id_document;
+	public void setIdFT_document(int IdFT_document) {
+		this.IdFT_document = IdFT_document;
 	}
 
 
 	public void setDate_upload_document(String date_upload_document) {
-		this.date_upload_document = date_upload_document;
+		this.date_upload_document=date_upload_document;
 	}
 
 
 	public Document() {
 		super();
-		this.date_upload_document = formater.format(new Date());
 	}
 
 
 	public String getContent_document() {
 		return this.content_document;
 	}
-	public double getId_document() {
-		return this.id_document;
+	public int getIdFT_document() {
+		return this.IdFT_document;
 	}
 	public String getDate_upload_document() {
 		return this.date_upload_document;
@@ -103,15 +107,17 @@ public class Document {
 
 	@Override
 	public String toString() {
-		return "Document [content_document=" + content_document + ", id_document=" + id_document
+		
+		return "Document [content_document=" + content_document + ", IdFT_document=" + IdFT_document
 				+ ", date_upload_document=" + date_upload_document + ", version_document=" + version_document
 				+ ", formater=" + formater + ", title_document=" + title_document + ", fragment_document_highlighter="
 				+ fragment_document_highlighter + "]";
+		
 	}
 
 
 	
-
+	
 	
 	
 }

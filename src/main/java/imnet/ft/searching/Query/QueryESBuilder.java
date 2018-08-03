@@ -8,11 +8,11 @@ import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
-import imnet.ft.commun.configuration.ElasticSearchDefaultConfiguration;
+import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
 
 public class QueryESBuilder {
 	
-	private String default_field = ElasticSearchDefaultConfiguration.DEFAULTFIELDSEARCH.getText();
+	private String default_field = ElasticDefaultConfiguration.DEFAULTFIELDSEARCH.getText();
 	private String values;
 	private Operator operator;
 	private TimeValue scroll_time_query;

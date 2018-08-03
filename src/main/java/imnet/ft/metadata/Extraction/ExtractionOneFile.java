@@ -8,11 +8,13 @@ import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.log4j.Logger;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
@@ -31,6 +33,7 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.json.simple.JSONObject;
 import org.xml.sax.SAXException;
 
+import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
 import imnet.ft.metadata.config.TikaProperty;
 
 
@@ -48,6 +51,7 @@ public class ExtractionOneFile {
 	private int current_document_id;
 	private int current_document_FT_id;
 	private int current_document_ims_id;
+	private String current_document_date_archi;
 	/*Façade pour accéder aux fonctionnalités de Tika. 
 	 * Cette classe cache une grande partie de la complexité 
 	 * sous-jacente des classes Tika de niveau inférieur 
@@ -60,6 +64,9 @@ public class ExtractionOneFile {
 	public static String PARAM_AGENCE_ID = "agence_id";
 	public static String PARAM_PAGE = "page";
 	public static String PARAM_JETON_DWS = "st";
+	
+	private int secondTry=0;
+
 	private static Logger log = Logger.getLogger(ExtractionOneFile.class);
 	
 	public ExtractionOneFile(String current_document_url_dws) {
@@ -102,12 +109,11 @@ public class ExtractionOneFile {
 	public int getCurrent_document_FT_id() {return current_document_FT_id;}
 	public int getCurrent_document_ims_id() {return current_document_ims_id;}
 	public int getCurrent_document_id() {return current_document_id;}
+	public String getCurrent_document_date_archi() {return current_document_date_archi;}
 
 	
 	
-	
-	
-	
+	public ExtractionOneFile setCurrent_document_date_archi(String current_document_date_archi) {this.current_document_date_archi = current_document_date_archi;return this;}
 	public ExtractionOneFile setCurrent_document_id(int current_document_id) {this.current_document_id = current_document_id;return this;}
 	public ExtractionOneFile setCurrent_document_FT_id(int current_document_FT_id) {this.current_document_FT_id = current_document_FT_id;return this;}
 	public ExtractionOneFile setCurrent_document_ims_id(int current_document_ims_id) {this.current_document_ims_id = current_document_ims_id;return this;}
@@ -132,7 +138,10 @@ public class ExtractionOneFile {
 		try {
 			str = this.getFacade_tika().parseToString(this.getFile());
 			this.metaDataFile.put("content", str);
-		}  catch (TikaException | IOException e) {
+		}  catch (TikaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -142,7 +151,6 @@ public class ExtractionOneFile {
 	public String getDocumentType() throws IOException {	
 				
 				this.setFile_type(this.getFacade_tika().detect(this.getFile()));
-				System.out.println("type "+getFile_type()+"\n");
 				return this.getFile_type();
 			
 
@@ -195,7 +203,6 @@ public class ExtractionOneFile {
 	
 	public void generateMetaData(){
 	    StringWriter writer = new StringWriter();
-	    
 		TikaInputStream inputStream = null;
 
 		try {
@@ -214,8 +221,11 @@ public class ExtractionOneFile {
 					for (String name : metadata.names()) {
 						this.metaDataFile.put(name, metadata.get(name));
 					}
-					this.getMetadata().put("content", writer.toString());
-					this.getMetadata().put("document_ims_id", this.getCurrent_document_ims_id());
+					
+					this.getMetadata().put(ElasticDefaultConfiguration.FIELD_CONTENT.getText(), writer.toString());//desactivé pour les test
+					this.getMetadata().put(ElasticDefaultConfiguration.FIELD_IDFT.getText(), this.getCurrent_document_FT_id());
+					this.getMetadata().put(ElasticDefaultConfiguration.FILED_DATE.getText(), this.getCurrent_document_date_archi());
+					
 					this.closeStrem(inputStream);
 					writer.close();
 				}
@@ -226,7 +236,7 @@ public class ExtractionOneFile {
 			}
 			// System.out.println(this.getMetadata());
 			log.info("Fin de traitement du fichier " + this.getFile().getName());
-		} catch (IOException | SAXException | TikaException e) {
+		} catch (IOException | SAXException | TikaException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	   
@@ -246,31 +256,71 @@ public class ExtractionOneFile {
 			}
 	}
 
-	private TikaInputStream getStremOneFile(URL url) throws IOException {
-
+	private TikaInputStream getStremOneFile(URL url) throws IOException, InterruptedException {
 		TikaInputStream inputStream = null;
-
-		if (!url.equals("") ) {
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.connect();
-			if(getMsgErreur(conn.getResponseCode(),url)==null) {return null;}
+		while(this.secondTry<=2) {
+		if (this.connectToUrlValidate(url)) {
+			//if(getMsgErreur(conn.getResponseCode(),url)==null) {return null;}
 			inputStream = TikaInputStream.get(url);
 			if (inputStream.getFile().isFile()) {
 				this.setFile(inputStream.getFile());
 				return inputStream;
 			} else {
 				log.error(TikaProperty.ERREUR_URL_DWS_MSG + "\t[ URL ] " + url.toString());
+				return null;
 			}
-		} else {
+		}else {
+		    Thread.sleep(8000);
 			log.warn(TikaProperty.ERREUR_CONNEXION_URL_DWS_MSG + url.toString());
+			log.info("Essai n° "+secondTry);
+			this.secondTry +=1;
+			getStremOneFile(url);
+			
 		}
-
-		return null;
+		}
+		
+		return inputStream;
 	}
 	
 	private Object getMsgErreur(int response,URL url) {
 		if(response!=200) {log.warn("[Response Code] "+response+" "+TikaProperty.ERREUR_NOT_EXIST_URL_DWS_MSG+url.getFile());return null;}
 		if(response==404) {log.warn("[Response Code "+response+" ] "+TikaProperty.ERREUR_CONNEXION_URL_DWS_MSG+url.getHost());return null;}
 		return "response ok";
+	}
+	
+	
+	private boolean connectToUrlValidate(URL url)  {
+        int responseServer = 0;
+            HttpURLConnection urlConn;
+			try {
+				urlConn = (HttpURLConnection) url.openConnection();
+				responseServer=urlConn.getResponseCode();
+				if(responseServer!=200) {
+					log.error("le serveur dws ne repond pas [ServerResponse] "+responseServer);
+	            	log.info("Traçabilité [ URL ] "+url.toString());
+	            	return false;
+				}
+				log.info("le serveur dws a repondu sans probléme .. Le fichier est disponible [ ServerResponse ] "+urlConn.getResponseCode());
+            	log.info("Traçabilité [ URL ] "+url.toString());
+            	return true;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				log.error("le serveur dws ne repond pas [ServerResponse] "+responseServer);
+            	log.info("Traçabilité [ URL ] "+url.toString());
+            	return false;
+			}
+//            if(HttpURLConnection.HTTP_OK==urlConn.getResponseCode()) {
+//            	log.info("le serveur dws a repondu sans probléme .. Le fichier est disponible [ ServerResponse ] "+urlConn.getResponseCode());
+//            	log.info("Traçabilité [ URL ] "+url.toString());
+//
+//            	return true;
+//            }
+//            else {
+//            	log.error("le serveur dws ne repond pas [ServerResponse] "+urlConn.getResponseCode());
+//            	log.info("Traçabilité [ URL ] "+url.toString());
+//            	return false;
+//            }
+
+        
 	}
 }

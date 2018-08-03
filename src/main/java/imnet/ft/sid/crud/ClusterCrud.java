@@ -25,6 +25,12 @@ public class ClusterCrud {
 	
 	private TransportClient client;
 	
+	
+
+
+
+
+
 	private static Logger logger = Logger.getLogger(ClusterCrud.class);
 
 	
@@ -34,12 +40,13 @@ public class ClusterCrud {
 	}
 
 
-	public void createNewIndex(String title,XContentBuilder schema) {
-		logger.info("ClusterCrud : Creation d'un nouveau index : En cours");
+	public void createNewIndex(String index,XContentBuilder schema) {
+		logger.info("Demande de création d'un nouveau index [ "+index+" ]");
 		CreateIndexResponse createIndex = null;
+		if(!this.existIndex(index)) {
 			createIndex = client.admin()
 					.indices()
-					.prepareCreate(title.toLowerCase())
+					.prepareCreate(index.toLowerCase())
 					.setSource(schema)
 					.execute()
 					.actionGet();
@@ -48,10 +55,14 @@ public class ClusterCrud {
 				logger.info("Création d'un nouveau index : Ok! ");
 			else
 				logger.error("Création d'un nouveau index --> ES response [" + createIndex.isAcknowledged()+"]");
-	}
+	
+		}else {
+			
+		}
+		}
 	
 	
-	public void getIndexInfo(String indexx,String type) {
+	public void getIndexInfo(String indexx) {
 		GetSettingsResponse response = client.admin().indices()
 		        .prepareGetSettings(indexx).get();                           
 		for (ObjectObjectCursor<String, Settings> cursor : response.getIndexToSettings()) { 
@@ -63,7 +74,7 @@ public class ClusterCrud {
 		}
 	}
 	
-	public void getAllIndex(String cluster) {
+	public void getAllIndex() {
 		ClusterHealthResponse healths = client.admin().cluster().prepareHealth().get(); 
     	String clusterName = healths.getClusterName();              
     	int numberOfDataNodes = healths.getNumberOfDataNodes();     
@@ -86,9 +97,14 @@ public class ClusterCrud {
 	
 	public void deleteIndex(String index) {
 		try {
+			if(!this.existIndex(index)) {
+				logger.warn("Problème lors la supprission de l'index : "+index+" \n\tL'index n'existe pas");
+			}
+			else {
 			DeleteIndexRequest request = new DeleteIndexRequest(index);
 			client.admin().indices().delete(request);
 			logger.info("L'index  < " + index + " > a été supprimé avec succès");
+			}
 
 		} catch (ElasticsearchException exception) {
 			if (exception.status() == RestStatus.NOT_FOUND) {
@@ -99,7 +115,7 @@ public class ClusterCrud {
 
 	
 	public boolean existIndex(String str) {
-		return (client.admin().indices().prepareExists(str).execute().actionGet().isExists());
+		return (client.admin().indices().prepareExists(str.toLowerCase()).execute().actionGet().isExists());
 	}
 	
 	
@@ -118,5 +134,15 @@ public class ClusterCrud {
 		
 		return false;
 		
+	}
+	
+
+	public void setClient(TransportClient client) {
+		this.client = client;
+	}
+	
+	public TransportClient getClient() {
+		
+		return this.client;
 	}
 }

@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
@@ -18,8 +20,11 @@ import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
+import com.beust.jcommander.internal.Nullable;
+
 import org.apache.log4j.Logger;
 
+import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
 import imnet.ft.commun.util.ElasticSearchReservedWords;
 import imnet.ft.sid.entities.Document;
 
@@ -87,33 +92,57 @@ public class DocumentCRUD {
 	}
 
 
-	public void addOneDoc() {
-			
+	public void addOneDoc(Document doc) {
+		logger.info("Debut de l'indexation du document < "+doc.getIdFT_document()+" >");
+		IndexResponse response = client.prepareIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText(),ElasticDefaultConfiguration.DEFAULTINDEXTYPE.getText())
+		        .setSource(this.docSourceJsonBuilder(doc))
+		        .get();
+		if(response.status().getStatus()==201) {
+			logger.info("Le document < "+doc.getIdFT_document()+" > a été bien indexé");
+		}
+		else {
+			logger.error("gestion d'erreur est reprise + traçabilité");
+		}
+		
 			
 	}
 	
-	public void addDocsInBulk(Map<Double,Document> documentsLot) {
+	
+	public String addLotToindex(Map<Integer,Document> documentsLot) {
+		for(Entry<Integer,Document> entry:documentsLot.entrySet()) {
+			this.addOneDoc(entry.getValue());
+		}
+
+		return "fin";
+	}
+	
+	//Prbléme de traçabilité des documents
+	public void addDocsInBulk(Map<Integer,Document> documentsLot) {
 		long debut = System.currentTimeMillis();
 		this.bulkRequest = client.prepareBulk();
-		for(Entry<Double,Document> entry:documentsLot.entrySet()) {
-			if(entry.getValue()!=null&&entry.getValue().getId_document()!=0&&!entry.getValue().getContent_document().equals("")) {
-			bulkRequest.add(client.prepareIndex(index, ElasticSearchReservedWords.TYPE.getText())
+		
+		for(Entry<Integer,Document> entry:documentsLot.entrySet()) {
+			if(entry.getValue()!=null&&entry.getValue().getIdFT_document()!=0&&!entry.getValue().getContent_document().equals("")&&this.docSourceJsonBuilder(entry.getValue())!=null) {
+				
+				bulkRequest.add(client.prepareIndex(index, ElasticSearchReservedWords.TYPE.getText())
 					.setSource(this.docSourceJsonBuilder(entry.getValue()))
 				);
-			logger.info("Indexation du document < "+entry.getValue().getTitle_document()+" >");
+			logger.info("Le document < "+entry.getValue().getIdFT_document()+" > a été bien ajouter à la chaine d'indexation par batch");
 			}else{
-				logger.warn("Problème d'indexation du document < "+entry.getValue().getId_document()+" >");
+				//gestion des erreurs pour plus tard 
+				logger.warn("Problème d'indexation du document < "+entry.getValue().getIdFT_document()+" >");
 			}
 		}
 		
 		
-		BulkResponse bulkResponse = this.bulkRequest.get();
-		logger.info("estimation bulk "+(System.currentTimeMillis()-debut)+" response bulk time "+bulkResponse.getTook());
-
+		BulkResponse bulkResponse = this.bulkRequest.get();		
+		
 		if (bulkResponse.hasFailures()) {
-			logger.info("Probléme bulk");
+			logger.warn("Problème bulk");
+			logger.info("Nombre de doc " +bulkResponse.buildFailureMessage());
+		}else {
+			logger.info("[RAS] L'indexation par bulk s'est bien passé [ Durée ]"+bulkResponse.getIngestTookInMillis());
 		}
-
 	}
 
 	public  List<String> getFieldMap(){
@@ -128,20 +157,30 @@ public class DocumentCRUD {
 	}
 
 	public XContentBuilder docSourceJsonBuilder(Document docs) {
-
+		if(this.readyToBeIndexed(docs)) {
 		try {
 			XContentBuilder doc= XContentFactory.jsonBuilder().startObject();
-			doc.field("ID_DOCUMENT",docs.getId_document())
-				.field("CONTENT_DOCUMENT",docs.getContent_document())
-				.field("DATE_UPLOAD_DOCUMENT",docs.getDate_upload_document())
-				.field("VERSION_DOCUMENT",docs.getversion_document());
+			doc.field(ElasticDefaultConfiguration.FIELD_IDFT.getText(),docs.getIdFT_document())
+				.field(ElasticDefaultConfiguration.FIELD_CONTENT.getText(),docs.getContent_document())
+				.field(ElasticDefaultConfiguration.FILED_DATE.getText(),docs.getDate_upload_document());				
 			doc.endObject();
 			return doc;
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		}
 		return null;
+	}
+	
+	public boolean readyToBeIndexed(Document doc) {
+			if(doc.getIdFT_document()!=0&&doc.getDate_upload_document()!=null&&!doc.getContent_document().equals("")) {
+				logger.info("Le document ["+doc.getIdFT_document()+"] est prêt pour être indexé");
+				return true;
+			}
+			logger.info("Le document ["+doc.getIdFT_document()+"] n'est pas prêt pour être indexé");
+			return false;
 	}
 	 private  List<String> getList(String fieldName, Map<String, Object> mapProperties) {
          List<String> fieldList = new ArrayList<String>();

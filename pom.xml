@@ -15,11 +15,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-server</artifactId>
-			<version>1.19</version>
-		</dependency>
+
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-servlet</artifactId>
@@ -51,6 +47,16 @@
 			<version>1.19.4</version>
 		</dependency>
 		<dependency>
+			<groupId>com.jcabi</groupId>
+			<artifactId>jcabi-log</artifactId>
+			<version>0.17.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+			<version>1.6</version>
+		</dependency>
+		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-json</artifactId>
 			<version>1.19.4</version>
@@ -60,16 +66,17 @@
 			<artifactId>jersey-server</artifactId>
 			<version>1.19.4</version>
 		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-servlet</artifactId>
-			<version>1.19</version>
-		</dependency>
+
 		<dependency>
 			<groupId>org.codehaus.jettison</groupId>
 			<artifactId>jettison</artifactId>
 			<version>1.4.0</version>
 		</dependency>
+		<dependency>
+  <groupId>com.jcabi</groupId>
+  <artifactId>jcabi-log</artifactId>
+  <version>0.17.1</version>
+</dependency>
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
@@ -104,8 +111,6 @@
 			<version>6.0.0</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-		<!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
 		<dependency>
 			<groupId>commons-httpclient</groupId>
 			<artifactId>commons-httpclient</artifactId>
@@ -126,7 +131,8 @@
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-app</artifactId>
 			<version>1.18</version>
-		</dependency><dependency>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parsers</artifactId>
 			<version>1.18</version>
@@ -134,5 +140,6 @@
 	</dependencies>
 	<build>
 		<finalName>b_ESClient</finalName>
+
 	</build>
 </project>

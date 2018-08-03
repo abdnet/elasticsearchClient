@@ -34,8 +34,7 @@ public class SearchService {
 	public Response createProductInJSON(String str) {
 
 		String result = "Product created : " + str;
-		return Response.status(201).entity(result).build();
-		
+		return Response.status(201).entity(result).build();	
 	}
 	
 	
@@ -43,8 +42,7 @@ public class SearchService {
 	@Path("/test")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String test() {
-		System.out.println("addo");
-		return "c'est un test";
+		return "c est un test";
 		
 	}
 	

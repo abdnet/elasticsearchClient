@@ -19,11 +19,10 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.json.simple.JSONObject;
 
-import imnet.ft.commun.configuration.ElasticSearchDefaultConfiguration;
+import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
 import imnet.ft.commun.util.ElasticSearchReservedWords;
 import imnet.ft.searching.Templates.SearchTemplate;
 import imnet.ft.sid.entities.ResultatFT;
-import tikka.sid.commun.tika.ExtractMetaData;
 
 
 
@@ -170,11 +169,11 @@ public class ImnetFTQuery {
 	public String sendResponseQuery(String queryType,String queryStr,int fetchpage) {
 			template = new SearchTemplate(this.getClient());
 			
-			this.searchresponse= this.client.prepareSearch(ElasticSearchDefaultConfiguration.DEFAULTINDEXNAME.getText())
-					.setTypes(ElasticSearchDefaultConfiguration.DEFAULTINDEXTYPE.getText())
+			this.searchresponse= this.client.prepareSearch(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText())
+					.setTypes(ElasticDefaultConfiguration.DEFAULTINDEXTYPE.getText())
 					.setQuery(template.switcherSearchByType(ElasticSearchReservedWords.QUERY_MATCH.getText(),queryStr,ElasticSearchReservedWords.OPERATOR_OR.getText()))
-					.setSize(Integer.parseInt(ElasticSearchDefaultConfiguration.DEFAULTSIZEPAGE.getText()))
-					.highlighter(this.getHitlight(ElasticSearchDefaultConfiguration.DEFAULTFIELDSEARCH.getText()))
+					.setSize(Integer.parseInt(ElasticDefaultConfiguration.DEFAULTSIZEPAGE.getText()))
+					.highlighter(this.getHitlight(ElasticDefaultConfiguration.DEFAULTFIELDSEARCH.getText()))
 					.setScroll(new TimeValue(6000))
 					.get();
 			return this.responseToJsonObject(this.searchresponse);
@@ -197,23 +196,23 @@ public class ImnetFTQuery {
 		while(this.searchresponse.getHits().getHits().length>0)
 		{			 
 			 this.responseToJsonObject(this.getSearchresponse());
-			 this.searchresponse = client.prepareSearchScroll(this.getSearchresponse().getScrollId()).setScroll(new TimeValue(Long.parseLong(ElasticSearchDefaultConfiguration.DEFAULTTIMEVALUESCROLL.getText()))).execute().actionGet();
+			 this.searchresponse = client.prepareSearchScroll(this.getSearchresponse().getScrollId()).setScroll(new TimeValue(Long.parseLong(ElasticDefaultConfiguration.DEFAULTTIMEVALUESCROLL.getText()))).execute().actionGet();
 		}
 
 		return "fdqfd";
 	}
 	
-	public String getIndexByLanguage(String strQuery) {
-		ExtractMetaData extractMetaData = new ExtractMetaData();
-		String language="neant";
-		try {
-			 language=extractMetaData.detectFileLanguage(strQuery);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return language;
-		
-	}
+//	public String getIndexByLanguage(String strQuery) {
+//		ExtractMetaData extractMetaData = new ExtractMetaData();
+//		String language="neant";
+//		try {
+//			 language=extractMetaData.detectFileLanguage(strQuery);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		return language;
+//		
+//	}
 }
 
 

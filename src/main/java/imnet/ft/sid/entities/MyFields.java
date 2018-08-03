@@ -11,8 +11,8 @@ public class MyFields {
 	private String field_type;
 	private String field_analyzer;
 	private String field_search_analyzer;
-	private boolean field_indexed=false;
-	private boolean field_stored=true;
+	private boolean field_indexed;
+	private boolean field_stored;
 	private String field_copyTO="";
 	private Map<String,Object> autre_options = null;
 	
@@ -120,7 +120,13 @@ public class MyFields {
 		this.autre_options = autre_options;
 		return this;
 	}
-
+	
+	public MyFields setOne_option(String str,Object value) {
+		if(this.autre_options==null) {this.autre_options=new HashMap<String,Object>();}
+		this.autre_options.put(str, value);
+		return this;
+		
+	}
 
 	@Override
 	public String toString() {

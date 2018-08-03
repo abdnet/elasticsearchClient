@@ -1,6 +1,6 @@
 package imnet.ft.commun.configuration;
 
-public enum ElasticSearchDefaultConfiguration
+public enum ElasticDefaultConfiguration
 {
 	DEFAULTFIELDSEARCH("CONTENT_DOCUMENT"),
 	DEFAULTFIELDSEARCHDATE("DATE_ARCHI_DOCUMENT"),
@@ -16,20 +16,22 @@ public enum ElasticSearchDefaultConfiguration
 	DEFAULTINDEXPREFIXE("IMNET-"),
 	DEFAULTSEARCHOPERATOR("OR"),
 	DEFAULTSIZEPAGE("160"),
-	DEFAULTTIMEVALUESCROLL("6000")
-	//DEFAULTANALYZER("")
-
-	
-
-	;
+	DEFAULTTIMEVALUESCROLL("6000"),
     
+	/*Indexation default filed */
+
+	FIELD_CONTENT("CONTENT_DOCUMENT"),
+	FIELD_IDIIMS("IDIMS_DOCUMENT"),
+	FILED_DATE("DATE_ARCH_DOCUMENT"),//FROM BATCHAGENT
+	FIELD_IDFT("IDFT_DOCUMENT")
+	;
     private String text;
     
     public String getText() {
 		return text;
 	}
 
-	private ElasticSearchDefaultConfiguration(String text)
+	private ElasticDefaultConfiguration(String text)
     {
         this.text = text;
     }

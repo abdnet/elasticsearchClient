@@ -17,7 +17,7 @@ import imnet.ft.sid.entities.ESConfiguration;
 public class ClientTransptES {
 
 	private ESConfiguration configES;
-    private TransportClient client ;
+    private TransportClient client =null;
     private Properties elasticPro;
 	
 	public ClientTransptES(ESConfiguration config) {
@@ -40,7 +40,6 @@ public class ClientTransptES {
 	        	Settings setting = Settings.builder()
 	                    .put("cluster.name", elasticPro.getProperty("cluster"))
 	                    .put("client.transport.sniff", Boolean.valueOf(elasticPro.getProperty("transport.sniff"))).build();
-
 	            client = new PreBuiltTransportClient(setting)
 	                    .addTransportAddress(new TransportAddress(InetAddress.getByName(elasticPro.getProperty("host")), Integer.valueOf(elasticPro.getProperty("port"))));
 	        } catch (UnknownHostException ex) {
