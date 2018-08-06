@@ -8,7 +8,8 @@ import java.util.Locale;
 
 public class Document {
 	private String content_document ="";
-	private int IdFT_document=0;
+	private int idFT_document=0;
+	private int new_idFT_document=0;
 	private String  date_upload_document;
 	private long version_document=0;
 	private SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.FRANCE);
@@ -18,34 +19,23 @@ public class Document {
 	private String fragment_document_highlighter = "";
 	
 	
-	public Document(String content_document, int IdFT_document, String date_upload_document,
-			long version_document,String title) {
+	public Document(String content_document, int idFT_document, String date_upload_document,
+			long version_document,String title,int new_idFT_document) {
 		super();
 		this.content_document = content_document;
-		this.IdFT_document = IdFT_document;
+		this.idFT_document = idFT_document;
 		this.date_upload_document = date_upload_document;
 		this.version_document = version_document;
 		this.title_document=title;
+		this.new_idFT_document=new_idFT_document;
 	}
+
 	
-	
-	public long getVersion_document() {
-		return this.version_document;
+	public Document() {
+		super();
 	}
-
-
-	public void setVersion_document(long version_document) {
-		this.version_document = version_document;
-	}
-
-
-	public SimpleDateFormat getFormater() {
-		return formater;
-	}
-
-
-	public void setFormater(SimpleDateFormat formater) {
-		this.formater = formater;
+	public String getContent_document() {
+		return content_document;
 	}
 
 
@@ -54,37 +44,48 @@ public class Document {
 	}
 
 
-	public void setIdFT_document(int IdFT_document) {
-		this.IdFT_document = IdFT_document;
+	public int getIdFT_document() {
+		return idFT_document;
+	}
+
+
+	public void setIdFT_document(int idFT_document) {
+		this.idFT_document = idFT_document;
+	}
+
+
+	public int getNew_idFT_document() {
+		return new_idFT_document;
+	}
+
+
+	public void setNew_idFT_document(int new_idFT_document) {
+		this.new_idFT_document = new_idFT_document;
+	}
+
+
+	public String getDate_upload_document() {
+		return date_upload_document;
 	}
 
 
 	public void setDate_upload_document(String date_upload_document) {
-		this.date_upload_document=date_upload_document;
+		this.date_upload_document = date_upload_document;
 	}
 
 
-	public Document() {
-		super();
-	}
-
-
-	public String getContent_document() {
-		return this.content_document;
-	}
-	public int getIdFT_document() {
-		return this.IdFT_document;
-	}
-	public String getDate_upload_document() {
-		return this.date_upload_document;
-	}
-	public long getversion_document() {
+	public long getVersion_document() {
 		return version_document;
 	}
 
 
+	public void setVersion_document(long version_document) {
+		this.version_document = version_document;
+	}
+
+
 	public String getTitle_document() {
-		return this.title_document;
+		return title_document;
 	}
 
 
@@ -92,27 +93,16 @@ public class Document {
 		this.title_document = title_document;
 	}
 
-	//Pour la recherche 
-	//Stocker les fragments d'un document [ highlighter ]
-	
+
 	public String getFragment_document_highlighter() {
-		return this.fragment_document_highlighter;
-	}
-
-
-	public void setFragment_document_highlighter(String fragment_document_highlighter) {
-		this.fragment_document_highlighter = fragment_document_highlighter;
+		return fragment_document_highlighter;
 	}
 
 
 	@Override
 	public String toString() {
-		
-		return "Document [content_document=" + content_document + ", IdFT_document=" + IdFT_document
-				+ ", date_upload_document=" + date_upload_document + ", version_document=" + version_document
-				+ ", formater=" + formater + ", title_document=" + title_document + ", fragment_document_highlighter="
-				+ fragment_document_highlighter + "]";
-		
+		return "Document [idFT_document=" + idFT_document + ", new_idFT_document=" + new_idFT_document
+				+ ", date_upload_document=" + date_upload_document + "]";
 	}
 
 

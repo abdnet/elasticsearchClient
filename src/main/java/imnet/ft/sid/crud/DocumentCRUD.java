@@ -26,7 +26,9 @@ import org.apache.log4j.Logger;
 
 import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
 import imnet.ft.commun.util.ElasticSearchReservedWords;
+import imnet.ft.searching.Query.ImnetFTQuery;
 import imnet.ft.sid.entities.Document;
+import imnet.ft.sid.purgeDocument.PurgeDocument;
 
 public class DocumentCRUD {
 	
@@ -36,11 +38,15 @@ public class DocumentCRUD {
 	private String index;
 	private BulkRequestBuilder bulkRequest;
 	private static Logger logger = Logger.getLogger(DocumentCRUD.class);
-
+	private PurgeDocument purge;
 	public DocumentCRUD(TransportClient client,String index) {
 		super();
 		this.client=client;
 		this.index=index;
+		this.purge=new PurgeDocument(index)
+				.setClient(client)
+				.setPurge_type(ElasticDefaultConfiguration.PURGEINDIRECTE.getText())
+			 	.setDefault_field(ElasticDefaultConfiguration.FIELD_IDFT.getText());
 	}
 
 
@@ -94,17 +100,26 @@ public class DocumentCRUD {
 
 	public void addOneDoc(Document doc) {
 		logger.info("Debut de l'indexation du document < "+doc.getIdFT_document()+" >");
-		IndexResponse response = client.prepareIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText(),ElasticDefaultConfiguration.DEFAULTINDEXTYPE.getText())
-		        .setSource(this.docSourceJsonBuilder(doc))
-		        .get();
-		if(response.status().getStatus()==201) {
-			logger.info("Le document < "+doc.getIdFT_document()+" > a été bien indexé");
-		}
-		else {
-			logger.error("gestion d'erreur est reprise + traçabilité");
-		}
-		
-			
+		ImnetFTQuery query = new ImnetFTQuery(client);
+		if(!this.reindexation(doc)) {			
+					if(query.getDocumentByIdFT(doc.getIdFT_document(), ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText())&&doc.getNew_idFT_document()==0) {
+					IndexResponse response = client.prepareIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText(),ElasticDefaultConfiguration.DEFAULTINDEXTYPE.getText())
+					        .setSource(this.docSourceJsonBuilder(doc))
+					        .get();
+					if(response.status().getStatus()==201) {
+						logger.info("Le document < "+doc.getIdFT_document()+" > a été bien indexé");
+					}
+					else {
+						logger.error("gestion d'erreur est reprise + traçabilité");
+					}
+					}else {
+							logger.warn("Le document [ "+doc.getIdFT_document()+" ] a été déja indexe");
+					}
+		}else {
+			logger.info("re-indexation");
+			doc.setNew_idFT_document(0);
+			this.addOneDoc(doc);
+		}			
 	}
 	
 	
@@ -157,20 +172,21 @@ public class DocumentCRUD {
 	}
 
 	public XContentBuilder docSourceJsonBuilder(Document docs) {
-		if(this.readyToBeIndexed(docs)) {
-		try {
-			XContentBuilder doc= XContentFactory.jsonBuilder().startObject();
-			doc.field(ElasticDefaultConfiguration.FIELD_IDFT.getText(),docs.getIdFT_document())
-				.field(ElasticDefaultConfiguration.FIELD_CONTENT.getText(),docs.getContent_document())
-				.field(ElasticDefaultConfiguration.FILED_DATE.getText(),docs.getDate_upload_document());				
-			doc.endObject();
-			return doc;
+			if(this.readyToBeIndexed(docs)) {
+			try {
+				XContentBuilder doc= XContentFactory.jsonBuilder().startObject();
+				doc.field(ElasticDefaultConfiguration.FIELD_IDFT.getText(),docs.getIdFT_document())
+					.field(ElasticDefaultConfiguration.FIELD_CONTENT.getText(),docs.getContent_document())
+					.field(ElasticDefaultConfiguration.FILED_DATE.getText(),docs.getDate_upload_document());				
+				doc.endObject();
+				return doc;
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		}
+			}
+			
 		return null;
 	}
 	
@@ -181,6 +197,25 @@ public class DocumentCRUD {
 			}
 			logger.info("Le document ["+doc.getIdFT_document()+"] n'est pas prêt pour être indexé");
 			return false;
+	}
+	
+	public boolean reindexation(Document doc) {
+		if (doc.getIdFT_document() == doc.getNew_idFT_document() ||doc.getNew_idFT_document() != doc.getIdFT_document()&& (doc.getNew_idFT_document() != 0)) {
+			logger.info("Demande de re-indexation du document [ID_FT] " + doc.getIdFT_document());
+			this.purge
+			 	.setValue(String.valueOf(doc.getIdFT_document()))
+			 	.purgeDocumentByFTId();
+			
+			 doc.setIdFT_document(doc.getNew_idFT_document());
+			logger.info("L'id du document devient [ID_FT] " + doc.getIdFT_document());
+			return true;
+		}
+		if (doc.getNew_idFT_document() == 0) {
+			return false;
+		}
+		
+
+		return false;
 	}
 	 private  List<String> getList(String fieldName, Map<String, Object> mapProperties) {
          List<String> fieldList = new ArrayList<String>();

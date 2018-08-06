@@ -50,6 +50,7 @@ public class ExtractionOneFile {
 	private String current_document_url_dws;
 	private int current_document_id;
 	private int current_document_FT_id;
+	private int current_document_New_FT_id;
 	private int current_document_ims_id;
 	private String current_document_date_archi;
 	/*Façade pour accéder aux fonctionnalités de Tika. 
@@ -110,9 +111,11 @@ public class ExtractionOneFile {
 	public int getCurrent_document_ims_id() {return current_document_ims_id;}
 	public int getCurrent_document_id() {return current_document_id;}
 	public String getCurrent_document_date_archi() {return current_document_date_archi;}
+	public int getCurrent_document_New_FT_id() {return current_document_New_FT_id;}
 
 	
 	
+	public ExtractionOneFile setCurrent_document_New_FT_id(int current_document_New_FT_id) {this.current_document_New_FT_id = current_document_New_FT_id;return this;}
 	public ExtractionOneFile setCurrent_document_date_archi(String current_document_date_archi) {this.current_document_date_archi = current_document_date_archi;return this;}
 	public ExtractionOneFile setCurrent_document_id(int current_document_id) {this.current_document_id = current_document_id;return this;}
 	public ExtractionOneFile setCurrent_document_FT_id(int current_document_FT_id) {this.current_document_FT_id = current_document_FT_id;return this;}
@@ -224,6 +227,7 @@ public class ExtractionOneFile {
 					
 					this.getMetadata().put(ElasticDefaultConfiguration.FIELD_CONTENT.getText(), writer.toString());//desactivé pour les test
 					this.getMetadata().put(ElasticDefaultConfiguration.FIELD_IDFT.getText(), this.getCurrent_document_FT_id());
+					this.getMetadata().put(ElasticDefaultConfiguration.FIELD_NEW_IDFT.getText(), this.getCurrent_document_New_FT_id());
 					this.getMetadata().put(ElasticDefaultConfiguration.FILED_DATE.getText(), this.getCurrent_document_date_archi());
 					
 					this.closeStrem(inputStream);

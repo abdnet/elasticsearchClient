@@ -83,7 +83,9 @@ public enum ElasticSearchReservedWords
 	/*
 	 * type de requete 
 	 * */
-	QUERY_MATCH("match")
+	QUERY_MATCH("match"),
+	EXIST_DOCUMENT("existDoc"),
+	DELETE_FRQUERY("purgeByFTQuery")
 	;
     
     private String text;

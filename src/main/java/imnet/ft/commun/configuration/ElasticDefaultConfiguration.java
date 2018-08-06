@@ -23,7 +23,16 @@ public enum ElasticDefaultConfiguration
 	FIELD_CONTENT("CONTENT_DOCUMENT"),
 	FIELD_IDIIMS("IDIMS_DOCUMENT"),
 	FILED_DATE("DATE_ARCH_DOCUMENT"),//FROM BATCHAGENT
-	FIELD_IDFT("IDFT_DOCUMENT")
+	FIELD_IDFT("IDFT_DOCUMENT"),
+	FIELD_NEW_IDFT("NEW_IDFT_DOCUMENT"),
+	
+	
+	
+	/*Purge document*/
+	
+	PURGEDIRECTE("Purge document"),
+	PURGEINDIRECTE("Re-indexation")
+
 	;
     private String text;
     

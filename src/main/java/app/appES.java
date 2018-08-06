@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
@@ -30,6 +31,7 @@ import imnet.ft.sid.crud.DocumentCRUD;
 import imnet.ft.sid.entities.Document;
 import imnet.ft.sid.entities.ESConfiguration;
 import imnet.ft.sid.entities.MyFields;
+import imnet.ft.sid.purgeDocument.PurgeDocument;
 
 public class appES {
 
@@ -43,6 +45,7 @@ public class appES {
 			{
 				put("url_dws", "http://mma.perso.eisti.fr/HTML-IAD/2.pdf");
 				put("document_ft_id", 1);
+				put("new_document_ft_id", 0);
 				put("document_id", 5);
 				put("document_ims_id", 12);
 				put("document_date_archi", formater.format(date).toString());
@@ -54,6 +57,7 @@ public class appES {
 			{
 				put("url_dws", "http://mma.perso.eisti.fr/HTML-IAD/3.pdf");
 				put("document_ft_id", 3);
+				put("new_document_ft_id", 0);
 				put("document_id", 5);
 				put("document_ims_id", 12);
 				put("document_date_archi", formater.format(date).toString());
@@ -64,7 +68,8 @@ public class appES {
 		final HashMap<String, Object> doc_4 = new HashMap<String, Object>() {
 			{
 				put("url_dws", "http://mma.perso.eisti.fr/HTML-IAD/1.pdf");
-				put("document_ft_id", 4);
+				put("document_ft_id", 47);
+				put("new_document_ft_id",0);
 				put("document_id", 5);
 				put("document_ims_id", 12);
 				put("document_date_archi", formater.format(date).toString());
@@ -76,6 +81,7 @@ public class appES {
 			{
 				put("url_dws", "http://mma.perso.eisti.fr/HTML-IAD/4.pdf");
 				put("document_ft_id", 5);
+				put("new_document_ft_id", 5);
 				put("document_id", 5);
 				put("document_ims_id", 12);
 				put("document_date_archi", formater.format(date).toString());
@@ -87,6 +93,7 @@ public class appES {
 			{
 				put("url_dws", "http://mma.perso.eisti.fr/HTML-IAD/5.pdf");
 				put("document_ft_id", 6);
+				put("new_document_ft_id", 0);
 				put("document_id", 5);
 				put("document_ims_id", 12);
 				put("document_date_archi", formater.format(date).toString());
@@ -100,6 +107,7 @@ public class appES {
 			{
 				put("url_dws", "http://localhost:8080/files/algorithme_indexation_SRI_thse_fethi_fkih.doc");
 				put("document_ft_id", 2);
+				put("new_document_ft_id", 0);
 				put("document_id", 6);
 				put("document_ims_id", 24);
 				put("document_date_archi", formater.format(date).toString());
@@ -253,18 +261,17 @@ public class appES {
 
 		ClientTransptES trasport = new ClientTransptES(config);
 		ClusterCrud client = new ClusterCrud(trasport.getInstant());
-		client.deleteIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
+		//client.deleteIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
 		client.createNewIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText(), schema.indexDefaultInit());
 		client.getIndexInfo(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
-		client.getAllIndex();
+		//client.getAllIndex();
 
 		ExtractionByBatch extract = new ExtractionByBatch().setLot_document_dwsUrl_sequenceIdFT_dateArchivage(lot_1);
 
 		extract.treatmentByBatch();
 
-		DocumentCRUD crud = new DocumentCRUD();
-		crud.setClient(trasport.getInstant());
-		crud.setIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
+		DocumentCRUD crud = new DocumentCRUD(trasport.getInstant(),ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
+		
 		Map<Integer, Document> docsMap = new HashMap<Integer, Document>();
 
 		for (Entry<Integer, Object> entry : extract.getLot_all_metadata_documents().entrySet()) {
@@ -272,16 +279,22 @@ public class appES {
 			Map<String, Object> metadata = (Map<String, Object>) entry.getValue();
 			Document docs = new Document();
 			for (Entry<String, Object> entry2 : metadata.entrySet()) {
+				
 				if (entry2.getKey().equals(ElasticDefaultConfiguration.FIELD_CONTENT.getText())) {
 					docs.setContent_document(entry2.getValue().toString());
 				}
 				if (entry2.getKey().equals(ElasticDefaultConfiguration.FIELD_IDFT.getText())) {
 					docs.setIdFT_document(Integer.parseInt(entry2.getValue().toString()));
 				}
+				if (entry2.getKey().equals(ElasticDefaultConfiguration.FIELD_NEW_IDFT.getText())) {
+					System.out.println(entry2.getValue().toString());
+					docs.setNew_idFT_document(Integer.parseInt(entry2.getValue().toString()));
+				}
 				if (entry2.getKey().equals(ElasticDefaultConfiguration.FILED_DATE.getText())) {
 					docs.setDate_upload_document(entry2.getValue().toString());
-					System.out.println(entry2.getValue().toString());
 				}
+				
+				
 				docsMap.put(entry.getKey(), docs);
 			}
 
@@ -294,9 +307,11 @@ public class appES {
 
 		}
 		crud.addLotToindex(docsMap);
-
-		// crud.getFieldMap();
-
+		client.refrechIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
+		
+//		PurgeDocument purge = new PurgeDocument(client,ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
+//		purge.setDefault_field(ElasticDefaultConfiguration.FIELD_CONTENT.getText())
+//				.setValue("java lucene").setPurge_type(ElasticDefaultConfiguration.PURGEDIRECTE.getText()).purgeDocumentByQueryFT();
 	}
 
 }

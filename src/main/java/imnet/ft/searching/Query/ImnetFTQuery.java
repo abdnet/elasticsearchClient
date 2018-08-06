@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -15,6 +17,8 @@ import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.json.simple.JSONObject;
@@ -22,6 +26,7 @@ import org.json.simple.JSONObject;
 import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
 import imnet.ft.commun.util.ElasticSearchReservedWords;
 import imnet.ft.searching.Templates.SearchTemplate;
+import imnet.ft.sid.crud.DocumentCRUD;
 import imnet.ft.sid.entities.ResultatFT;
 
 
@@ -40,7 +45,13 @@ public class ImnetFTQuery {
 	private ResultatFT resultats_fulltext;
 	private TimeValue scrollTime_scroll;
 	private SearchResponse searchresponse=null;
+	private static Logger logger = Logger.getLogger(ImnetFTQuery.class);
+
 	public ImnetFTQuery(Client client) {this.client = client;}
+	
+	
+	
+	
 	public ImnetFTQuery(Client client, String query_Type, Map<String, String> fields_Data,
 			Map<String, Map<String, String>> type_WITH_fields, int size,String sort, String aggs) {
 		super();
@@ -62,8 +73,6 @@ public class ImnetFTQuery {
 	public int getMax_response() {return this.max_response;}	
 	public String getSort() {return sort;}
 	public String getAggs() {return aggs;}
-	
-	
 	
 	public SearchResponse getSearchresponse() {return searchresponse;}
 	public ImnetFTQuery setSearchresponse(SearchResponse searchresponse) {this.searchresponse = searchresponse;return this;}
@@ -166,6 +175,8 @@ public class ImnetFTQuery {
 				    
 				}
 		}
+	
+	
 	public String sendResponseQuery(String queryType,String queryStr,int fetchpage) {
 			template = new SearchTemplate(this.getClient());
 			
@@ -201,6 +212,20 @@ public class ImnetFTQuery {
 
 		return "fdqfd";
 	}
+	
+	public boolean getDocumentByIdFT(int idft_document,String index) {
+		template = new SearchTemplate(this.getClient());
+		this.searchresponse=this.client.prepareSearch(index).setTypes(ElasticDefaultConfiguration.DEFAULTINDEXTYPE.getText())
+							.setQuery(template.switcherSearchByType(ElasticSearchReservedWords.EXIST_DOCUMENT.getText(), Integer.toString(idft_document), "")).get();
+		if(searchresponse.getHits().getTotalHits()==0) {
+			logger.info(" Query [ "+ElasticSearchReservedWords.EXIST_DOCUMENT.getText()+"] :"+" Vérification de document [ "+ElasticDefaultConfiguration.FIELD_IDFT.getText()+" ] [ "+idft_document+" ]");
+			return true;
+		}
+		return false;
+	}
+	
+	
+	
 	
 //	public String getIndexByLanguage(String strQuery) {
 //		ExtractMetaData extractMetaData = new ExtractMetaData();

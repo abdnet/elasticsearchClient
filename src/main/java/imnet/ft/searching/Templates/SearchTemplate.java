@@ -15,6 +15,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.json.simple.JSONObject;
 
+import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
 import imnet.ft.indexing.Index.ImnetAnalyzer;
 import imnet.ft.searching.Query.QueryESBuilder;
 
@@ -73,8 +74,13 @@ public class SearchTemplate {
 			break;
 		case "simple_query_string":
 				break;
-		case "":
-				break;
+		case "purgeByFTId":
+			return this.queryESBuilder.setValues(queryStrValue).setDefault_field(ElasticDefaultConfiguration.FIELD_IDFT.getText()).existeDocument();
+		case "purgeByFTQuery":
+			return this.queryESBuilder.setValues(queryStrValue).setDefault_field(ElasticDefaultConfiguration.FIELD_CONTENT.getText()).existeDocument();
+				
+		case "existDoc":
+				return this.queryESBuilder.setValues(queryStrValue).setDefault_field(ElasticDefaultConfiguration.FIELD_IDFT.getText()).existeDocument();
 		default :	
 				logger.debug("le type de recherche "+search_type+" n'est pas disponible");
 				break;

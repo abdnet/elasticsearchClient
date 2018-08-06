@@ -1,6 +1,7 @@
 package imnet.ft.searching.Query;
 
 
+import org.apache.log4j.Logger;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
@@ -9,6 +10,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
 import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
+import imnet.ft.sid.crud.DocumentCRUD;
 
 public class QueryESBuilder {
 	
@@ -16,6 +18,8 @@ public class QueryESBuilder {
 	private String values;
 	private Operator operator;
 	private TimeValue scroll_time_query;
+	private static Logger logger = Logger.getLogger(QueryESBuilder.class);
+
 	public QueryESBuilder() {
 		super();
 	}
@@ -30,6 +34,7 @@ public class QueryESBuilder {
 	public QueryESBuilder setOperator(String operator) {this.operator = Operator.valueOf(operator.toUpperCase());return this;}
 	public TimeValue getScroll_time_query() {return scroll_time_query;}
 	public QueryESBuilder setScroll_time_query(TimeValue scroll_time_query) {this.scroll_time_query = scroll_time_query;return this;}
+	public QueryESBuilder setDefault_field(String default_field) {this.default_field = default_field;return this;}
 
 
 
@@ -40,7 +45,6 @@ public class QueryESBuilder {
 	}
 
 	public QueryBuilder matchQuey() {
-		System.out.println("operateur demandé "+this.getOperator() +"\n value "+this.getValues());
 		QueryBuilder query = 
 				QueryBuilders.matchQuery(
 						this.getDefault_field(), 
@@ -49,9 +53,7 @@ public class QueryESBuilder {
 				.operator(this.getOperator())
 				.queryName("matchQuery")
 				.fuzziness(Fuzziness.AUTO)
-				.maxExpansions(1)
-				;
-		System.out.println(query.toString());
+				.maxExpansions(1);
 
 		return query;
 	}
@@ -80,8 +82,23 @@ public class QueryESBuilder {
 	
 	
 	public QueryBuilder commonTermsQuery() {
-		QueryBuilder query = QueryBuilders.commonTermsQuery(getDefault_field(), "");
-		return null;
+		QueryBuilder query = QueryBuilders.commonTermsQuery(getDefault_field(), this.getValues())
+					.queryName("ExistDocuement");
+		logger.info(" Quergy [ "+query.getName()+"] :"+" Vérification de document [ "+ElasticDefaultConfiguration.FIELD_IDFT.getText()+" ] [ "+this.getValues()+" ]");
+
+		return query;
+	}
+	
+	
+	
+	public QueryBuilder existeDocument() {
+		QueryBuilder query = 
+				QueryBuilders.matchQuery(
+						this.getDefault_field(), 
+						this.getValues()
+					)
+				.queryName("ExistDocuement|PurgeDocument");
+		return query;
 	}
 	
 	

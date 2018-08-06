@@ -50,14 +50,14 @@ public class ClusterCrud {
 					.setSource(schema)
 					.execute()
 					.actionGet();
-		
+			
 			if(createIndex.isAcknowledged())
 				logger.info("Création d'un nouveau index : Ok! ");
 			else
 				logger.error("Création d'un nouveau index --> ES response [" + createIndex.isAcknowledged()+"]");
 	
 		}else {
-			
+			logger.info("L'index "+index+" existe déja");
 		}
 		}
 	
@@ -70,7 +70,7 @@ public class ClusterCrud {
 		    Settings settings = cursor.value;                                               
 		    Integer shards = settings.getAsInt("index.number_of_shards", null);             
 		    Integer replicas = settings.getAsInt("index.number_of_replicas", null);
-		    logger.info("index key "+index+" shards "+shards+" replicas "+replicas+" \n\n settings "+settings.size());
+		    logger.info("index key "+index+" shards "+shards+" replicas "+replicas+" \n\n settings "+settings);
 		}
 	}
 	
@@ -136,7 +136,11 @@ public class ClusterCrud {
 		
 	}
 	
-
+	public void refrechIndex(String index) {
+		client.admin().indices().prepareRefresh(index)               
+        .get();
+	}
+	
 	public void setClient(TransportClient client) {
 		this.client = client;
 	}
@@ -145,4 +149,6 @@ public class ClusterCrud {
 		
 		return this.client;
 	}
+	
+	
 }
