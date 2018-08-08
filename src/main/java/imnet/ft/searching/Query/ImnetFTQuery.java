@@ -179,7 +179,7 @@ public class ImnetFTQuery {
 	
 	public String sendResponseQuery(String queryType,String queryStr,int fetchpage) {
 			template = new SearchTemplate(this.getClient());
-			
+			System.out.println(queryStr+"************************");
 			this.searchresponse= this.client.prepareSearch(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText())
 					.setTypes(ElasticDefaultConfiguration.DEFAULTINDEXTYPE.getText())
 					.setQuery(template.switcherSearchByType(ElasticSearchReservedWords.QUERY_MATCH.getText(),queryStr,ElasticSearchReservedWords.OPERATOR_OR.getText()))

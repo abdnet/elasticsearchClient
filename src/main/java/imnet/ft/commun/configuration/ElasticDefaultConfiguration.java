@@ -6,6 +6,7 @@ public enum ElasticDefaultConfiguration
 	DEFAULTFIELDSEARCHDATE("DATE_ARCHI_DOCUMENT"),
 	DEFAULTSHARD(""),
 	DEFAULTREPLICAT(""),
+	DEFAULTCLUSTERCLIENT("elasticsearch"),
 	DEFAULTHOSTESCLIENT("127.0.0.1"),
 	DEFAULTHOSTPORTESCLIENT("9300"),
 	DEFAULTINDEXNAME("idouhammou"),//recherche sur tt les index disponible

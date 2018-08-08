@@ -10,7 +10,7 @@
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer </servlet-class>
 		<init-param>
 			<param-name>com.sun.jersey.config.property.packages</param-name>
-			<param-value>imnet.ft.service</param-value>
+			<param-value>imnet.ft.services</param-value>
 		</init-param>
 		
 		<init-param>
@@ -21,7 +21,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>imnetft</servlet-name>
-		<url-pattern>/* </url-pattern>
+		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>

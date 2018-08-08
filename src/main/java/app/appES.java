@@ -80,7 +80,7 @@ public class appES {
 		final HashMap<String, Object> doc_5 = new HashMap<String, Object>() {
 			{
 				put("url_dws", "http://mma.perso.eisti.fr/HTML-IAD/4.pdf");
-				put("document_ft_id", 5);
+				put("document_ft_id", 15);
 				put("new_document_ft_id", 5);
 				put("document_id", 5);
 				put("document_ims_id", 12);
@@ -261,57 +261,61 @@ public class appES {
 
 		ClientTransptES trasport = new ClientTransptES(config);
 		ClusterCrud client = new ClusterCrud(trasport.getInstant());
-		//client.deleteIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
+		client.deleteIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
 		client.createNewIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText(), schema.indexDefaultInit());
-		client.getIndexInfo(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
-		//client.getAllIndex();
-
-		ExtractionByBatch extract = new ExtractionByBatch().setLot_document_dwsUrl_sequenceIdFT_dateArchivage(lot_1);
-
-		extract.treatmentByBatch();
-
-		DocumentCRUD crud = new DocumentCRUD(trasport.getInstant(),ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
 		
-		Map<Integer, Document> docsMap = new HashMap<Integer, Document>();
-
-		for (Entry<Integer, Object> entry : extract.getLot_all_metadata_documents().entrySet()) {
-
-			Map<String, Object> metadata = (Map<String, Object>) entry.getValue();
-			Document docs = new Document();
-			for (Entry<String, Object> entry2 : metadata.entrySet()) {
-				
-				if (entry2.getKey().equals(ElasticDefaultConfiguration.FIELD_CONTENT.getText())) {
-					docs.setContent_document(entry2.getValue().toString());
-				}
-				if (entry2.getKey().equals(ElasticDefaultConfiguration.FIELD_IDFT.getText())) {
-					docs.setIdFT_document(Integer.parseInt(entry2.getValue().toString()));
-				}
-				if (entry2.getKey().equals(ElasticDefaultConfiguration.FIELD_NEW_IDFT.getText())) {
-					System.out.println(entry2.getValue().toString());
-					docs.setNew_idFT_document(Integer.parseInt(entry2.getValue().toString()));
-				}
-				if (entry2.getKey().equals(ElasticDefaultConfiguration.FILED_DATE.getText())) {
-					docs.setDate_upload_document(entry2.getValue().toString());
-				}
-				
-				
-				docsMap.put(entry.getKey(), docs);
-			}
-
-			// long debut = System.currentTimeMillis();
-			// trasport.getInstant().prepareIndex("idouhammou","type")
-			// .setSource(
-			// crud.docSourceJsonBuilder(docs))
-			// .execute().actionGet();
-			// fin +=(System.currentTimeMillis()-debut);
-
-		}
-		crud.addLotToindex(docsMap);
-		client.refrechIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
-		
+//		System.out.println(lot_1);
+//		
+//		ExtractionByBatch extract = new ExtractionByBatch().setLot_document_dwsUrl_sequenceIdFT_dateArchivage(lot_1);
+//
+//		extract.treatmentByBatch();
+//
+//		DocumentCRUD crud = new DocumentCRUD(trasport.getInstant(),ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
+//		
+//		Map<Integer, Document> docsMap = new HashMap<Integer, Document>();
+//
+//		for (Entry<Integer, Object> entry : extract.getLot_all_metadata_documents().entrySet()) {
+//
+//			Map<String, Object> metadata = (Map<String, Object>) entry.getValue();
+//			Document docs = new Document();
+//			for (Entry<String, Object> entry2 : metadata.entrySet()) {
+//				
+//				if (entry2.getKey().equals(ElasticDefaultConfiguration.FIELD_CONTENT.getText())) {
+//					docs.setContent_document(entry2.getValue().toString());
+//				}
+//				if (entry2.getKey().equals(ElasticDefaultConfiguration.FIELD_IDFT.getText())) {
+//					docs.setIdFT_document(Integer.parseInt(entry2.getValue().toString()));
+//				}
+//				if (entry2.getKey().equals(ElasticDefaultConfiguration.FIELD_NEW_IDFT.getText())) {
+//					System.out.println(entry2.getValue().toString());
+//					docs.setNew_idFT_document(Integer.parseInt(entry2.getValue().toString()));
+//				}
+//				if (entry2.getKey().equals(ElasticDefaultConfiguration.FILED_DATE.getText())) {
+//					docs.setDate_upload_document(entry2.getValue().toString());
+//				}
+//				
+//				
+//				docsMap.put(entry.getKey(), docs);
+//			}
+//
+//			// long debut = System.currentTimeMillis();
+//			// trasport.getInstant().prepareIndex("idouhammou","type")
+//			// .setSource(
+//			// crud.docSourceJsonBuilder(docs))
+//			// .execute().actionGet();
+//			// fin +=(System.currentTimeMillis()-debut);
+//
+//		}
+//		crud.addLotToindex(docsMap);
+//		client.refrechIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
+//		
 //		PurgeDocument purge = new PurgeDocument(client,ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
 //		purge.setDefault_field(ElasticDefaultConfiguration.FIELD_CONTENT.getText())
 //				.setValue("java lucene").setPurge_type(ElasticDefaultConfiguration.PURGEDIRECTE.getText()).purgeDocumentByQueryFT();
+//		
+//		purge.setDefault_field(ElasticDefaultConfiguration.FIELD_IDFT.getText())
+//		.setValue("15").setPurge_type(ElasticDefaultConfiguration.PURGEDIRECTE.getText()).purgeDocumentByFTId();
+//		
 	}
 
 }
