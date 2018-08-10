@@ -3,6 +3,8 @@ package imnet.ft.sid.purgeDocument;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
+import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
@@ -54,7 +56,6 @@ public class PurgeDocument {
 	public PurgeDocument setClient(Client client) {this.client = client;return this;}
 
 	public boolean purgeDocumentByFTId() {
-		System.out.println(this.getClass());
 		SearchTemplate template = new SearchTemplate(this.getClient());
 		BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
 			    .filter(template.switcherSearchByType(ElasticSearchReservedWords.EXIST_DOCUMENT.getText(), this.getValue(), "")) 
@@ -89,6 +90,21 @@ public class PurgeDocument {
 		}
 	}
 
+	
+	public boolean purgeDocumentById() {
+		
+		
+		DeleteResponse response = client
+				.prepareDelete(this.getIndex(), ElasticSearchReservedWords.TYPE.getText(), this.getValue())
+				.get();
+		
+		if (response.status().getStatus() == 200) {
+			logger.info("Le document "+getValue()+" a été bien purgé");
+			return true;
+		}else {
+			return false;
+		}
+	}
 	@Override
 	public String toString() {
 		return "PurgeDocument [index=" + index + ", default_field=" + default_field + ", value=" + value
@@ -96,6 +112,12 @@ public class PurgeDocument {
 	}
 	
 	
+	
+	public String getDocumentById() {
+		GetResponse response = client.prepareGet("imnet-*",ElasticSearchReservedWords.TYPE.getText(), getValue()).get();
+		return response.getIndex();
+
+	}
 	
 
 	

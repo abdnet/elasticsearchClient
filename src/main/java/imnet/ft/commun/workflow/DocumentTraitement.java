@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import imnet.ft.commun.configuration.ClientTransptES;
 import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
+import imnet.ft.commun.trace.FullTextTracesDocument;
 import imnet.ft.metadata.Extraction.ExtractionByBatch;
 import imnet.ft.sid.crud.ClusterCrud;
 import imnet.ft.sid.crud.DocumentCRUD;
@@ -21,8 +22,11 @@ public class DocumentTraitement {
 	private ClusterCrud client;
 	private Map<String, Map<String, Object>> lot_document;
 	private DocumentCRUD crud;
-	public DocumentTraitement() {
+	private FullTextTracesDocument fullTextTracesDocument ;
+	public DocumentTraitement(FullTextTracesDocument fullTextTracesDocument) {
 		this.extract = new ExtractionByBatch();
+		this.setFullTextTracesDocument(fullTextTracesDocument);
+		this.extract.setFullTextTracesDocument(fullTextTracesDocument);
 		this.config = new ESConfiguration();
 		this.config.setCluster(ElasticDefaultConfiguration.DEFAULTCLUSTERCLIENT.getText())
 			.setHostIP(ElasticDefaultConfiguration.DEFAULTHOSTESCLIENT.getText())
@@ -33,6 +37,9 @@ public class DocumentTraitement {
 		//crud = new DocumentCRUD(this.transport.getInstant(),);
 		
 	}
+	
+	
+	
 
 	public String getIndex() {return /*(this.index.equals(""))?ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText():*/this.index;}
 	public Map<String, Map<String, Object>> getLot_document() {return lot_document;}
@@ -40,8 +47,15 @@ public class DocumentTraitement {
 	public ClientTransptES getTransport() {return transport;}
 	public ExtractionByBatch getExtract() {return extract;}
 
+	
+	public FullTextTracesDocument getFullTextTracesDocument() {return fullTextTracesDocument;}
+
+
+
+
+	public DocumentTraitement setFullTextTracesDocument(FullTextTracesDocument fullTextTracesDocument) {this.fullTextTracesDocument = fullTextTracesDocument;return this;}
 	public DocumentTraitement setLot_document(Map<String, Map<String, Object>> lot_document) {this.lot_document = lot_document;return this;}
-	public DocumentTraitement setIndex(String index) {this.index = index;return this;}
+	public DocumentTraitement setIndex(String index) {this.index = index.toLowerCase();return this;}
 	
 	
 	
@@ -74,7 +88,7 @@ public class DocumentTraitement {
 				docsMap.put(entry.getKey(), docs);
 			}
 		}
-		
+		this.crud.setFullTextTracesDocument(fullTextTracesDocument);
 		this.crud.addLotToindex(docsMap);
 		//this.getClient().refrechIndex(this.getIndex());
 		

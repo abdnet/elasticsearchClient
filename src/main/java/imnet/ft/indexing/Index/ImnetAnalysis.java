@@ -17,13 +17,13 @@ import imnet.ft.commun.util.ElasticSearchReservedWords;
 
 public class ImnetAnalysis {
 	
-	private ImnetAnalyzer imnetAnalyzer;
-	private ImnetTokenizer imnetTokenizer;
-	private ImnetCharFilter imnetCharFilter;
-	private ImnetFilter imnetFilter;
-	private List<ImnetFilter> listFilter;
+	protected ImnetAnalyzer imnetAnalyzer;
+	protected ImnetTokenizer imnetTokenizer;
+	protected ImnetCharFilter imnetCharFilter;
+	protected ImnetFilter imnetFilter;
+	protected List<ImnetFilter> listFilter;
 	
-	private static Logger logger = Logger.getLogger(ImnetAnalysis.class);
+	protected static Logger logger = Logger.getLogger(ImnetAnalysis.class);
 
 	
 	
@@ -84,7 +84,7 @@ public class ImnetAnalysis {
 		return this.listFilter;
 	}
 	
-	private XContentParser getObjectParserAllFilters(List<ImnetFilter> filters) throws IOException {
+	protected XContentParser getObjectParserAllFilters(List<ImnetFilter> filters) throws IOException {
 		
 		JSONObject obj = new JSONObject();
 		XContentParser parser = null;

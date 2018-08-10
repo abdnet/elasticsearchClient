@@ -21,6 +21,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import imnet.ft.commun.configuration.ClientTransptES;
+import imnet.ft.commun.trace.FullTextTracesDocument;
 import imnet.ft.commun.util.ElasticSearchReservedWords;
 import imnet.ft.metadata.Extraction.ExtractionByBatch;
 import imnet.ft.searching.Query.ImnetFTQuery;
@@ -39,12 +40,16 @@ public class ExtractionMTService {
 		ObjectMapper mapper = new ObjectMapper();
 		String res="";
 		try {
+			FullTextTracesDocument trace= new FullTextTracesDocument();
 			HashMap<String, Map<String,Object>> result =
 					mapper.readValue(lot, HashMap.class);
+			
 			ExtractionByBatch extractionByBatch = new ExtractionByBatch()
 				.setLot_document_dwsUrl_sequenceIdFT_dateArchivage(result);
+			
 			extractionByBatch.treatmentByBatch();
 			res=mapper.writeValueAsString(extractionByBatch.getLot_all_metadata_documents());
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

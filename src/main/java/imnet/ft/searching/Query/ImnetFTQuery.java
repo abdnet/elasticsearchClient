@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -22,6 +23,8 @@ import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.json.simple.JSONObject;
+
+import com.beust.jcommander.internal.Nullable;
 
 import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
 import imnet.ft.commun.util.ElasticSearchReservedWords;
@@ -222,6 +225,28 @@ public class ImnetFTQuery {
 			return true;
 		}
 		return false;
+	}
+	
+	
+	
+	public String getindexByDocument(@Nullable String idft_document,@Nullable String id_document) {
+		template = new SearchTemplate(this.getClient());
+
+			if(id_document.equals("")&&!idft_document.equals("")) {
+				this.searchresponse=this.client.prepareSearch(ElasticDefaultConfiguration.DEFAULTINDEXPREFIXE.getText()+"*")
+									.setTypes(ElasticDefaultConfiguration.DEFAULTINDEXTYPE.getText())
+									.setQuery(template.switcherSearchByType(ElasticSearchReservedWords.EXIST_DOCUMENT.getText(), idft_document, "")).get();
+				
+				return this.searchresponse.getHits().getHits()[0].getIndex();
+			}
+			
+			if(!id_document.equals("")&&idft_document.equals("")) {
+				
+				
+			}
+
+		return id_document;
+		
 	}
 	
 	

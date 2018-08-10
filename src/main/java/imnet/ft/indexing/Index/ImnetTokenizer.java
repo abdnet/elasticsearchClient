@@ -13,11 +13,11 @@ import jdk.nashorn.internal.parser.TokenKind;
 
 public class ImnetTokenizer {
 	
-	private String tokenizer_Name;
-	private Map<String,Map<String,Object>> tokenizer_options;
-	private boolean isDefaut;
+	protected String tokenizer_Name;
+	protected Map<String,Map<String,Object>> tokenizer_options;
+	protected boolean isDefaut;
 	
-	private List<String> tokenizerCreated=new ArrayList<String>();
+	protected List<String> tokenizerCreated=new ArrayList<String>();
 
 
 	public ImnetTokenizer(String tokenizer_Name, Map<String, Map<String, Object>> tokenizer_options, boolean isDefaut) {

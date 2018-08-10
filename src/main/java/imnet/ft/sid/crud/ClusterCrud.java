@@ -42,7 +42,7 @@ public class ClusterCrud {
 	
 	private Map<String,Object> index ;
 	private Map<String,Map<String,Object>> allindex = new HashMap<String,Map<String,Object>>();
-	
+	private boolean indexCreated;
 	
 
 
@@ -58,7 +58,7 @@ public class ClusterCrud {
 	}
 
 
-	public void createNewIndex(String index,XContentBuilder schema) {
+	public String createNewIndex(String index,XContentBuilder schema) {
 		logger.info("Demande de création d'un nouveau index [ "+index+" ]");
 		CreateIndexResponse createIndex = null;
 		if(!this.existIndex(index)) {
@@ -69,13 +69,21 @@ public class ClusterCrud {
 					.execute()
 					.actionGet();
 			
-			if(createIndex.isAcknowledged())
+			if(createIndex.isAcknowledged()) {
 				logger.info("Création d'un nouveau index : Ok! ");
-			else
+				this.indexCreated=createIndex.isAcknowledged();
+				return "Création d'un nouveau index : Ok! "+createIndex.isAcknowledged();
+			}
+			else {
 				logger.error("Création d'un nouveau index --> ES response [" + createIndex.isAcknowledged()+"]");
-	
+				this.indexCreated=false;
+				return "Création d'un nouveau index --> ES response [" + createIndex.isAcknowledged()+"]";
+			}
+	   
 		}else {
 			logger.info("L'index "+index+" existe déja");
+			this.indexCreated=false;
+			return "L'index "+index+" existe déja";
 		}
 		}
 	
@@ -176,6 +184,7 @@ public Object getIndexMapping(String indexx) {
 
 	
 	public boolean existIndex(String str) {
+		System.out.println("l'index demande par http "+str);
 		return (client.admin().indices().prepareExists(str.toLowerCase()).execute().actionGet().isExists());
 	}
 	

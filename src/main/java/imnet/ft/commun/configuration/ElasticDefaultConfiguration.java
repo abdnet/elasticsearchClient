@@ -11,10 +11,10 @@ public enum ElasticDefaultConfiguration
 	DEFAULTHOSTPORTESCLIENT("9300"),
 	DEFAULTINDEXNAME("idouhammou"),//recherche sur tt les index disponible
 	DEFAULTINDEXTYPE("type"),//version <=6.x
-	DEFAULTINDEX_FR_NAME("FRANCAIS"),
+	DEFAULTINDEX_FR_NAME("francais"),
 	DEFAULTINDEX_AR_NAME("ARABE"),
 	DEFAULTINDEX_EN_NAME("ANGLAIS"),
-	DEFAULTINDEXPREFIXE("IMNET-"),
+	DEFAULTINDEXPREFIXE("imnet-"),
 	DEFAULTSEARCHOPERATOR("OR"),
 	DEFAULTSIZEPAGE("160"),
 	DEFAULTTIMEVALUESCROLL("6000"),
@@ -32,8 +32,10 @@ public enum ElasticDefaultConfiguration
 	/*Purge document*/
 	
 	PURGEDIRECTE("Purge document"),
-	PURGEINDIRECTE("Re-indexation")
-
+	PURGEINDIRECTE("Re-indexation"),
+	
+	
+	TRACEOBJECT("TRACE_OBJECT")
 	;
     private String text;
     

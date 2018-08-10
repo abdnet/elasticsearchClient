@@ -12,12 +12,12 @@ import imnet.ft.commun.util.ElasticSearchReservedWords;
 
 public class ImnetSettings {
 
-	private int shards;
-	private int replicas;
-	private ImnetAnalysis analysis;
+	protected int shards;
+	protected int replicas;
+	protected ImnetAnalysis analysis;
 	
 	
-	private XContentParser parser =null ; 
+	protected XContentParser parser =null ; 
 	
 	
 	

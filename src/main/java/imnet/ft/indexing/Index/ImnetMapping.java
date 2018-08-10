@@ -15,8 +15,8 @@ import imnet.ft.commun.util.ElasticSearchReservedWords;
 public class ImnetMapping {
 	
 	
-	private List<imnet.ft.sid.entities.MyFields> fields=null;
-	private Map<String,Object> field_others_option = null;
+	protected List<imnet.ft.sid.entities.MyFields> fields=null;
+	protected Map<String,Object> field_others_option = null;
 	
 	
 	public ImnetMapping() {

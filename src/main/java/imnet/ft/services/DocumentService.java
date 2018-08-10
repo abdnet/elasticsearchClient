@@ -15,6 +15,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
+import imnet.ft.commun.trace.FullTextTracesDocument;
 import imnet.ft.commun.workflow.DocumentTraitement;
 import jdk.internal.org.objectweb.asm.TypeReference;
 
@@ -24,7 +25,7 @@ public class DocumentService {
 	private ObjectMapper mapper = new ObjectMapper();
 	private Map<String,Object> configurationES =null;
 	//private Map<String, Map<String, Object>> lot_document;
-	
+	private FullTextTracesDocument fullTextTracesDocument;
 	
 	@POST
 	@Path("indexDocs")
@@ -33,17 +34,17 @@ public class DocumentService {
 	
 	public String indexDocuments(String documents) {
 		String response="fin";
-		DocumentTraitement traitementlot = new DocumentTraitement();
+		this.fullTextTracesDocument = new FullTextTracesDocument();
+		DocumentTraitement traitementlot = new DocumentTraitement(this.fullTextTracesDocument);
 		HashMap<String, Map<String,Object>> lot_document = null;
 		if(!documents.equals("")) {
 			try {
 				lot_document =  mapper.readValue(documents,HashMap.class);
 				traitementlot.setLot_document(lot_document);
-				traitementlot.setIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText());
-
+				traitementlot.setIndex(ElasticDefaultConfiguration.DEFAULTINDEXPREFIXE.getText()+ElasticDefaultConfiguration.DEFAULTINDEX_FR_NAME.getText());
 				traitementlot.traitementLot();
-				response= mapper.writeValueAsString(lot_document);
-
+				response= mapper.writeValueAsString(this.fullTextTracesDocument.getChaineTraitementMSG());
+				this.fullTextTracesDocument.generateRapport();
 			} catch (JsonParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -55,8 +56,6 @@ public class DocumentService {
 				e.printStackTrace();
 			}
 		}
-		
 		return response;
-		
 	}
 }

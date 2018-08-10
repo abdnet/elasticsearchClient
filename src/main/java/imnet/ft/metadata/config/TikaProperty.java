@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface TikaProperty {
 	
-	  static final List<String> extension = Arrays.asList("docx","doc","pdf","txt","ppt","pptx","json");
+	  static final List<String> extension = Arrays.asList("docx","doc","pdf","txt","ppt","pptx","json","xlsx");
 	  
 	  
 	  static final HashMap<String, String> language = new HashMap<String, String>() {{

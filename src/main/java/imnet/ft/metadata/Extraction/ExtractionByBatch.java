@@ -8,13 +8,16 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 import org.apache.tika.metadata.TikaCoreProperties;
 
+import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
+import imnet.ft.commun.trace.FullTextTracesDocument;
+
 public class ExtractionByBatch {
 
 	
 	private Map<String,Map<String,Object>> lot_document_dwsUrl_sequenceIdFT_dateArchivage = null;
 	private Map<Integer,Object> lot_all_metadata_documents;
 	private ExtractionOneFile extract;
-	
+	private FullTextTracesDocument fullTextTracesDocument;
 	private String PARAM_CURRENT_DOC_URL_DWS="url_dws";
 	private String PARAM_CURRENT_DOC_FT_id="document_ft_id";
 	private String PARAM_CURRENT_DOC_NEW_FT_id="new_document_ft_id";
@@ -52,6 +55,17 @@ public class ExtractionByBatch {
 	
 	
 	
+	public FullTextTracesDocument getFullTextTracesDocument() {
+		return fullTextTracesDocument;
+	}
+
+
+	public ExtractionByBatch setFullTextTracesDocument(FullTextTracesDocument fullTextTracesDocument) {
+		this.fullTextTracesDocument = fullTextTracesDocument;
+		return this;
+	}
+
+
 	public void treatmentByBatch() {
 		int current_document_id;
 		int current_document_FT_id;
@@ -73,11 +87,15 @@ public class ExtractionByBatch {
 				this.extract=new ExtractionOneFile(current_document_url_dws);
 				this.extract.setCurrent_document_FT_id(current_document_FT_id)
 						.setCurrent_document_date_archi(current_document_date_archi)
-						.setCurrent_document_New_FT_id(current_document_NEW_FT_id);
+						.setCurrent_document_New_FT_id(current_document_NEW_FT_id)
+						.setFullTextTracesDocument(getFullTextTracesDocument());
+						
 				
 				this.extract.generateMetaData();
 				if(!this.extract.getMetadata().isEmpty()) { /*Prevoir un systeme de message bien structuré*/
+					this.extract.getMetadata().put(ElasticDefaultConfiguration.TRACEOBJECT.getText(), this.extract.getFullTextTracesDocument());
 					this.getLot_all_metadata_documents().put(current_document_FT_id, this.extract.getMetadata());
+					
 				}else {
 					log.warn("le doc "+current_document_id+" n'a pas été traité avec succés ");
 				}

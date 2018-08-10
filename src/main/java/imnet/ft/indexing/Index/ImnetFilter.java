@@ -21,15 +21,15 @@ import imnet.ft.commun.util.ElasticSearchReservedWords;
 
 public class ImnetFilter {
 	
-	private String filter_name;
-	private boolean isDefault;
-	private Map<String,Map<String,Object>> filter_object; 
-	private List<String> defaultfilter=new ArrayList<String>() ;
+	protected String filter_name;
+	protected boolean isDefault;
+	protected Map<String,Map<String,Object>> filter_object; 
+	protected List<String> defaultfilter=new ArrayList<String>() ;
 	
-	private List<String> filterCreated =new ArrayList<String>();
-	private boolean isObject,isValid;
-	private  XContentBuilder filter;
-	private static Logger logger = Logger.getLogger(ImnetFilter.class);
+	protected List<String> filterCreated =new ArrayList<String>();
+	protected boolean isObject,isValid;
+	protected  XContentBuilder filter;
+	protected static Logger logger = Logger.getLogger(ImnetFilter.class);
 
 	
 	

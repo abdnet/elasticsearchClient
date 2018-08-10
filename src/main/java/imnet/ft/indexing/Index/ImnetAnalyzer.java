@@ -124,7 +124,7 @@ public class ImnetAnalyzer {
 										 if(ElasticSearchReserved.analyzers_options.contains(entry2.getKey())) {
 											 //vérification de tokenzer
 											 //verification char filter
-											 if(entry2.getKey().equals("filter")) {												 
+											 if(entry2.getKey().equals("filter")) {
 												 analyzers.field(ElasticSearchReservedWords.FILTER.getText(),this.generatorFilterRaw((ImnetFilter)entry2.getValue()));
 											 }else{
 											 analyzers.field(entry2.getKey(),entry2.getValue());}

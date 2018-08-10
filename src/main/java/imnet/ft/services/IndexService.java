@@ -16,13 +16,16 @@ import org.codehaus.jackson.type.TypeReference;
 import imnet.ft.commun.configuration.ClientTransptES;
 import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
 import imnet.ft.commun.util.ElasticSearchReservedWords;
+import imnet.ft.indexing.IndexBuilder.IndexSchema;
+import imnet.ft.metadata.config.TikaProperty;
 import imnet.ft.sid.crud.ClusterCrud;
 import imnet.ft.sid.entities.ESConfiguration;
+import imnet.ft.sid.schema.FrenchSchema;
 
 @Path("indexApi")
 public class IndexService {
-	private ObjectMapper mapper = new ObjectMapper();
-	private Map<String,Object> configurationES =null;
+	protected ObjectMapper mapper = new ObjectMapper();
+	protected Map<String,Object> configurationES =null;
 	
 	@POST
 	@Path("/Allindex")
@@ -37,7 +40,6 @@ public class IndexService {
 								.setTransportSniff("true");
 			ClientTransptES trasport = new ClientTransptES(configuration);
 			ClusterCrud client = new ClusterCrud(trasport.getInstant());
-			
 			client.getAllIndex();
 			try {
 				response = mapper.writeValueAsString(client.getAllindex());
@@ -126,11 +128,71 @@ public class IndexService {
 				e.printStackTrace();
 			}
 		}
+		
+		
 		return response;
 		
 	}
 	
 	
+	
+	@POST
+	@Path("/create")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public String createIndexByLanguage(String lang) {
+		String response = "";
+		IndexSchema schema =null;
+		String index_name="";
+		ESConfiguration configuration = new ESConfiguration();
+		configuration.setCluster(ElasticDefaultConfiguration.DEFAULTCLUSTERCLIENT.getText())
+				.setHostIP(ElasticDefaultConfiguration.DEFAULTHOSTESCLIENT.getText())
+				.setPortTransport(ElasticDefaultConfiguration.DEFAULTHOSTPORTESCLIENT.getText())
+				.setTransportSniff("true");
+		ClientTransptES trasport = new ClientTransptES(configuration);
+		ClusterCrud client = new ClusterCrud(trasport.getInstant());
+		String langue = new String(lang.toLowerCase().trim());
+		System.out.println(" le protocole http m'a solicité  "+langue);
+
+		
+
+		if (langue.equals("fr")) {
+			index_name = ElasticDefaultConfiguration.DEFAULTINDEXPREFIXE.getText()
+					+ ElasticDefaultConfiguration.DEFAULTINDEX_FR_NAME.getText();
+			if (client.existIndex(index_name)) {
+				response = "L'index pour la langue " + TikaProperty.language.get(/*langue*/"fr") + " existe déja";
+
+			} else {
+				System.out.println("je suis solicité par le protocole http **" + index_name);
+				schema = new FrenchSchema().initFrenchSchema();
+			}
+
+		}
+
+		else {
+			schema = null;
+			System.out.println("ici default");
+		}
+
+		if (schema != null) {
+			response = client.createNewIndex(index_name, schema.indexDefaultInit());
+		}
+		
+		try {
+			response = mapper.writeValueAsString(response);
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return response;
+	}
 	
 	
 

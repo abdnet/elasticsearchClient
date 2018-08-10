@@ -34,6 +34,8 @@ import org.json.simple.JSONObject;
 import org.xml.sax.SAXException;
 
 import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
+import imnet.ft.commun.trace.FullTextTracesDocument;
+import imnet.ft.commun.trace.ImnetFTMessage;
 import imnet.ft.metadata.config.TikaProperty;
 
 
@@ -53,6 +55,7 @@ public class ExtractionOneFile {
 	private int current_document_New_FT_id;
 	private int current_document_ims_id;
 	private String current_document_date_archi;
+	private FullTextTracesDocument fullTextTracesDocument;
 	/*Façade pour accéder aux fonctionnalités de Tika. 
 	 * Cette classe cache une grande partie de la complexité 
 	 * sous-jacente des classes Tika de niveau inférieur 
@@ -65,7 +68,6 @@ public class ExtractionOneFile {
 	public static String PARAM_AGENCE_ID = "agence_id";
 	public static String PARAM_PAGE = "page";
 	public static String PARAM_JETON_DWS = "st";
-	
 	private int secondTry=0;
 
 	private static Logger log = Logger.getLogger(ExtractionOneFile.class);
@@ -112,9 +114,12 @@ public class ExtractionOneFile {
 	public int getCurrent_document_id() {return current_document_id;}
 	public String getCurrent_document_date_archi() {return current_document_date_archi;}
 	public int getCurrent_document_New_FT_id() {return current_document_New_FT_id;}
+	public FullTextTracesDocument getFullTextTracesDocument() {return fullTextTracesDocument;}
 
 	
 	
+	
+	public ExtractionOneFile setFullTextTracesDocument(FullTextTracesDocument fullTextTracesDocument) {this.fullTextTracesDocument = fullTextTracesDocument;return this;}
 	public ExtractionOneFile setCurrent_document_New_FT_id(int current_document_New_FT_id) {this.current_document_New_FT_id = current_document_New_FT_id;return this;}
 	public ExtractionOneFile setCurrent_document_date_archi(String current_document_date_archi) {this.current_document_date_archi = current_document_date_archi;return this;}
 	public ExtractionOneFile setCurrent_document_id(int current_document_id) {this.current_document_id = current_document_id;return this;}
@@ -174,6 +179,7 @@ public class ExtractionOneFile {
 	}
 	public boolean acceptedTypeDocument() throws IOException {
 		if(this.getFile().exists()) {
+		this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.DOCUMENT_ACCEPTED.getText());
 		return (TikaProperty.extension.contains(TikaProperty.format.get(this.getDocumentType()).toLowerCase()));
 		}else {
 			log.error("Le fichier "+this.file.getName()+" n'est pas valdie !!" );
@@ -207,12 +213,13 @@ public class ExtractionOneFile {
 	public void generateMetaData(){
 	    StringWriter writer = new StringWriter();
 		TikaInputStream inputStream = null;
-
+		this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.EXTRACTION_START.getText());
 		try {
 			inputStream =getStremOneFile(this.file_url);
 			if (this.acceptedTypeDocument()&&inputStream!=null) {
 					log.info("Lecture de fichier " + this.getFile().getName() + " depuis " + this.file_url.getHost()
 							+ " en stream");
+					this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.EXTRACTION_CTX.getText());
 					final Detector detector = new DefaultDetector();
 					final Parser parser = new AutoDetectParser(detector);
 					final ParseContext parseContext = new ParseContext();
@@ -229,6 +236,7 @@ public class ExtractionOneFile {
 					this.getMetadata().put(ElasticDefaultConfiguration.FIELD_IDFT.getText(), this.getCurrent_document_FT_id());
 					this.getMetadata().put(ElasticDefaultConfiguration.FIELD_NEW_IDFT.getText(), this.getCurrent_document_New_FT_id());
 					this.getMetadata().put(ElasticDefaultConfiguration.FILED_DATE.getText(), this.getCurrent_document_date_archi());
+					this.fullTextTracesDocument.getChaineTraitementMSG().add(ImnetFTMessage.EXTRACTION_SUCESS.getText());
 					
 					this.closeStrem(inputStream);
 					writer.close();
@@ -237,6 +245,7 @@ public class ExtractionOneFile {
 				this.closeStrem(inputStream);
 				writer.close();
 				log.warn("Erreur de  type : " + getFile().getName() + " n'est pas traité ");
+				this.getFullTextTracesDocument().getMessagesErr().add(ImnetFTMessage.DOCUMENT_NACCEPTED.getText());
 			}
 			// System.out.println(this.getMetadata());
 			log.info("Fin de traitement du fichier " + this.getFile().getName());
@@ -264,6 +273,7 @@ public class ExtractionOneFile {
 		TikaInputStream inputStream = null;
 		while(this.secondTry<=2) {
 		if (this.connectToUrlValidate(url)) {
+			
 			//if(getMsgErreur(conn.getResponseCode(),url)==null) {return null;}
 			inputStream = TikaInputStream.get(url);
 			if (inputStream.getFile().isFile()) {
@@ -300,10 +310,13 @@ public class ExtractionOneFile {
 				urlConn = (HttpURLConnection) url.openConnection();
 				responseServer=urlConn.getResponseCode();
 				if(responseServer!=200) {
+					this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.SERVER_DWS_500.getText());
 					log.error("le serveur dws ne repond pas [ServerResponse] "+responseServer);
 	            	log.info("Traçabilité [ URL ] "+url.toString());
 	            	return false;
 				}
+				this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.SERVER_DWS_200.getText());
+
 				log.info("le serveur dws a repondu sans probléme .. Le fichier est disponible [ ServerResponse ] "+urlConn.getResponseCode());
             	log.info("Traçabilité [ URL ] "+url.toString());
             	return true;
@@ -311,6 +324,8 @@ public class ExtractionOneFile {
 				// TODO Auto-generated catch block
 				log.error("le serveur dws ne repond pas [ServerResponse] "+responseServer);
             	log.info("Traçabilité [ URL ] "+url.toString());
+				this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.SERVER_DWS_500.getText());
+
             	return false;
 			}
 //            if(HttpURLConnection.HTTP_OK==urlConn.getResponseCode()) {

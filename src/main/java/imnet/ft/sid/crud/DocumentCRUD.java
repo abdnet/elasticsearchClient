@@ -25,6 +25,8 @@ import com.beust.jcommander.internal.Nullable;
 import org.apache.log4j.Logger;
 
 import imnet.ft.commun.configuration.ElasticDefaultConfiguration;
+import imnet.ft.commun.trace.FullTextTracesDocument;
+import imnet.ft.commun.trace.ImnetFTMessage;
 import imnet.ft.commun.util.ElasticSearchReservedWords;
 import imnet.ft.searching.Query.ImnetFTQuery;
 import imnet.ft.sid.entities.Document;
@@ -39,6 +41,7 @@ public class DocumentCRUD {
 	private BulkRequestBuilder bulkRequest;
 	private static Logger logger = Logger.getLogger(DocumentCRUD.class);
 	private PurgeDocument purge;
+	private FullTextTracesDocument fullTextTracesDocument;
 	public DocumentCRUD(TransportClient client,String index) {
 		super();
 		this.client=client;
@@ -56,66 +59,45 @@ public class DocumentCRUD {
 	}
 
 
-	public TransportClient getClient() {
-		return client;
-	}
+	public TransportClient getClient() {return client;}
+	public String getIndex() {return index;}
+	public Set<Document> getDocs() {return docs;}
+	public Document getDoc() {return doc;}
+	public FullTextTracesDocument getFullTextTracesDocument() {return fullTextTracesDocument;}
 
 
-	public void setClient(TransportClient client) {
-		this.client = client;
-	}
-
-
-	public String getIndex() {
-		return index;
-	}
-
-
-	public void setIndex(String index) {
-		this.index = index;
-	}
-
-
-	public Set<Document> getDocs() {
-		return docs;
-	}
-
-
-	public DocumentCRUD setDocs(Set<Document> docs) {
-		this.docs = docs;
-		return this;
-	}
-
-
-	public Document getDoc() {
-		return doc;
-	}
-
-
-	public DocumentCRUD setDoc(Document doc) {
-		this.doc = doc;
-		return this;
-	}
+	public DocumentCRUD setFullTextTracesDocument(FullTextTracesDocument fullTextTracesDocument) {this.fullTextTracesDocument = fullTextTracesDocument;return this;}
+	public DocumentCRUD setClient(TransportClient client) {this.client = client;return this;}
+	public DocumentCRUD setIndex(String index) {this.index = index;return this;}
+	public DocumentCRUD setDocs(Set<Document> docs) {this.docs = docs;return this;}
+	public DocumentCRUD setDoc(Document doc) {this.doc = doc;return this;}
 
 
 	public void addOneDoc(Document doc) {
+		this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.CHAINE_INDEXING_START.getText());
 		logger.info("Debut de l'indexation du document < "+doc.getIdFT_document()+" >");
 		ImnetFTQuery query = new ImnetFTQuery(client);
-		if(!this.reindexation(doc)) {			
-					if(query.getDocumentByIdFT(doc.getIdFT_document(), ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText())&&doc.getNew_idFT_document()==0) {
-					IndexResponse response = client.prepareIndex(ElasticDefaultConfiguration.DEFAULTINDEXNAME.getText(),ElasticDefaultConfiguration.DEFAULTINDEXTYPE.getText())
+		if(!this.reindexation(doc)) {
+				
+					if(query.getDocumentByIdFT(doc.getIdFT_document(), ElasticDefaultConfiguration.DEFAULTINDEXPREFIXE.getText()+ElasticDefaultConfiguration.DEFAULTINDEX_FR_NAME.getText())&&doc.getNew_idFT_document()==0) {
+						this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.DOCUMENT_FINEX.getText());
+					IndexResponse response = client.prepareIndex(ElasticDefaultConfiguration.DEFAULTINDEXPREFIXE.getText()+ElasticDefaultConfiguration.DEFAULTINDEX_FR_NAME.getText(),ElasticDefaultConfiguration.DEFAULTINDEXTYPE.getText())
 					        .setSource(this.docSourceJsonBuilder(doc))
 					        .get();
 					if(response.status().getStatus()==201) {
 						logger.info("Le document < "+doc.getIdFT_document()+" > a été bien indexé");
+						this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.DOCUMENT_INDEXED.getText());
 					}
 					else {
+						this.getFullTextTracesDocument().getMessagesErr().add(ImnetFTMessage.DOCUMENT_NONINDEXED.getText());
 						logger.error("gestion d'erreur est reprise + traçabilité");
 					}
 					}else {
+							this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.DOCUMENT_DEJAINDEXED.getText());
 							logger.warn("Le document [ "+doc.getIdFT_document()+" ] a été déja indexe");
 					}
 		}else {
+			this.getFullTextTracesDocument().getChaineTraitementMSG().add(ImnetFTMessage.DOCUMENT_200.getText());
 			logger.info("re-indexation");
 			doc.setNew_idFT_document(0);
 			this.addOneDoc(doc);
